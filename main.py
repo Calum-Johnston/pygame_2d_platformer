@@ -30,7 +30,7 @@ class Game:
         self.platform_sprites = pygame.sprite.Group()
 
         # Define player
-        self.player = Player()
+        self.player = Player(self)
         self.all_sprites.add(self.player)
         self.player_sprites.add(self.player)
 
@@ -45,10 +45,11 @@ class Game:
     def run(self):
         self.gameinstance = True
         while(self.gameinstance):
-            clock.tick(FPS)
             self.events()
             self.update()
             self.draw()
+            clock.tick(FPS)
+
 
     """ Process all of the events. Return a "True" if we need
         to close the window. """
@@ -57,17 +58,21 @@ class Game:
             if event.type == pygame.QUIT:
                 running = False
                 self.gameinstance = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.player.jump()
 
     """ This method is run each time through the frame. It
         updates positions and checks for collisions. """
     def update(self):
         self.all_sprites.update()
-        #Check for collison
-        collision = pygame.sprite.spritecollide(self.player, self.platform_sprites, False)
-        if(collision):
-            self.platform = collision[0]
-            self.player.pos.y = self.platform.rect.top
-            self.player.velocity.y = 0
+        #Check for collison (only if falling - prevents glitching to platforms)
+        if(self.player.velocity.y > 0):
+            collision = pygame.sprite.spritecollide(self.player, self.platform_sprites, False)
+            if(collision):
+                self.platform = collision[0]
+                self.player.pos.y = self.platform.rect.top + 1
+                self.player.velocity.y = 0
 
 
 

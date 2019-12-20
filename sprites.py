@@ -41,7 +41,7 @@ class Player(pygame.sprite.Sprite):
         # Decrease acceleration according friction, update velocity according to acceleration
         self.acceleration.x += self.velocity.x * PLAYER_FRICTION  # Friction only applies to x-range
         self.velocity += self.acceleration
-      #  print(self.acceleration)
+
         # Calculate the new position (could remove acceleration part)
         self.pos += self.velocity + 0.5 * self.acceleration
 

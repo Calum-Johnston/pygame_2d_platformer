@@ -4,71 +4,68 @@ import pygame
 from settings import *
 from sprites import Player
 
+# Defines global variables
+global screen
+global clock
+global running
+
+# Initialises game window, etc
+pygame.init()
+pygame.mixer.init()     
+screen = pygame.display.set_mode((WIDTH,HEIGHT))
+pygame.display.set_caption(Title)
+pygame.mouse.set_visible(False)
+screen = pygame.display.set_mode((WIDTH,HEIGHT))
+clock = pygame.time.Clock()
+
+
 class Game:
-    # initialises the program
+    """ Constructor. Create all our attributes and initialize
+        the game. """    
     def __init__(self):
-        pass
+        self.score = 0
 
-    # starts a new game
-    def new(self):
-        pass
+        self.sprite_list = pygame.sprite.Group()
+        self.player = Player()
+        self.sprite_list.add(self.player)
 
-    # runs the game - loop
+        self.run()
+
+    """ Runs the game. Defines the main game loop. """ 
     def run(self):
-        pass
+        self.gameinstance = True
+        while(self.gameinstance):
+            clock.tick(FPS)
+            self.events()
+            self.update()
+            self.draw()
 
-    # Loop = updates
-    def update(self):
-        pass
-
-    # Loop = events
+    """ Process all of the events. Return a "True" if we need
+        to close the window. """
     def events(self):
-        pass
-
-    # Loop = draws
-    def draw(self):
-        pass
-
-def main():     
-    # initialize the pygame module and create a window
-    pygame.init()
-    pygame.mixer.init()     
-    screen = pygame.display.set_mode((WIDTH,HEIGHT))
-    pygame.display.set_caption(Title)
-    clock = pygame.time.Clock()
-     
-    # initialize sprite group
-    sprite_list = pygame.sprite.Group()
-
-    # defines player sprite and adds to sprite list
-    player = Player()
-    sprite_list.add(player)
-
-    # main loop
-    running = True
-    while running:
-        # EVENTS
-        # event handling, gets all event from the event queue
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                self.gameinstance = False
 
-        # UPDATE
-        sprite_list.update()
+    """ This method is run each time through the frame. It
+        updates positions and checks for collisions. """
+    def update(self):
+        self.sprite_list.update()
 
-        # DRAWING
-        # drawing, fills the screen with some colour
+
+    """ Display everything to the screen for the game. """
+    def draw(self):
         screen.fill(BLUE)
-        # draw all sprites onto the screen
-        sprite_list.draw(screen)
-        # pygame is double-buffered, so this displays anything new drawn
+        self.sprite_list.draw(screen)
         pygame.display.flip()
 
-        # Number of frames per second (FPS)
-        clock.tick(FPS)
+class startScreen:
+    def __init__(self):
+        pass
 
-    pygame.quit()
-     
-# run the main function only if this module is executed as the main script
-if __name__=="__main__":
-    main()
+running = True
+while(running):
+    startScreen()
+    game = Game()
+

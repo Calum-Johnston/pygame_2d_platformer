@@ -2,7 +2,7 @@
 
 import pygame
 from settings import *
-from sprites import Player
+from sprites import Player, Platform
 
 # Defines global variables
 global screen
@@ -25,9 +25,19 @@ class Game:
     def __init__(self):
         self.score = 0
 
-        self.sprite_list = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
+        self.player_sprites = pygame.sprite.Group()
+        self.platform_sprites = pygame.sprite.Group()
+
+        # Define player
         self.player = Player()
-        self.sprite_list.add(self.player)
+        self.all_sprites.add(self.player)
+        self.player_sprites.add(self.player)
+
+        # Define platforms
+        self.pt = Platform(0, HEIGHT-40, WIDTH, 40)
+        self.all_sprites.add(self.pt)
+        self.platform_sprites.add(self.pt)
 
         self.run()
 
@@ -51,13 +61,21 @@ class Game:
     """ This method is run each time through the frame. It
         updates positions and checks for collisions. """
     def update(self):
-        self.sprite_list.update()
+        self.all_sprites.update()
+        #Check for collison
+        collision = pygame.sprite.spritecollide(self.player, self.platform_sprites, False)
+        if(collision):
+            self.platform = collision[0]
+            self.player.pos.y = self.platform.rect.top
+            self.player.velocity.y = 0
+
+
 
 
     """ Display everything to the screen for the game. """
     def draw(self):
         screen.fill(BLUE)
-        self.sprite_list.draw(screen)
+        self.all_sprites.draw(screen)
         pygame.display.flip()
 
 class startScreen:

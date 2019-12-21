@@ -58,23 +58,12 @@ class Game:
             if event.type == pygame.QUIT:
                 running = False
                 self.gameinstance = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    self.player.jump()
+
 
     """ This method is run each time through the frame. It
         updates positions and checks for collisions. """
     def update(self):
         self.all_sprites.update()
-        #Check for collison (only if falling - prevents glitching to platforms)
-        if(self.player.velocity.y > 0):
-            collision = pygame.sprite.spritecollide(self.player, self.platform_sprites, False)
-            if(collision):
-                self.platform = collision[0]
-                self.player.pos.y = self.platform.rect.top + 1
-                self.player.velocity.y = 0
-
-
 
 
     """ Display everything to the screen for the game. """

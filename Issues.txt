@@ -2,4 +2,10 @@ Player will move to top of platform on collision
 Player too big
 
 ERROR!!! Distance to nearest platform increases gradually over time with random code
-(No idea why)
+FIXED:
+- For inbuilt levels, distanceToNextBuild = distance between first new built plat (off-screen)
+  and final new built plat (off-screen)
+- For randomised levels, distanceToNextBuild = distance between highest plat (on-screen) and
+  final new built plat (off-screen)
+Because of this, the camera would have to move a little further each time before generating
+new platforms, and eventually it wouldn't generate them within range.

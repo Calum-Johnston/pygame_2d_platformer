@@ -1,4 +1,5 @@
 Player will move to top of platform on collision
 Player too big
 
-ERROR!!! Calculating
+ERROR!!! Distance to nearest platform increases gradually over time with random code
+(No idea why)

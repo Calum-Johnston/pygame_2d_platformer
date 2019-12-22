@@ -25,12 +25,12 @@ easy = []
 medium = []
 hard = []
 
-for x in range(1, 6):
-    with open("sections/easy/easy_%i.txt" % x) as textFile:
+for x in range(0, 5):
+    with open("sections/easy/easy_%i.txt" % (x + 1)) as textFile:
         easy.append([line.split() for line in textFile])
-    with open("sections/medium/medium_%i.txt" % x) as textFile:
+    with open("sections/medium/medium_%i.txt" % (x + 1)) as textFile:
         medium.append([line.split() for line in textFile])
-    with open("sections/hard/hard_%i.txt" % x) as textFile:
+    with open("sections/hard/hard_%i.txt" % (x + 1)) as textFile:
         hard.append([line.split() for line in textFile])
 
 
@@ -100,8 +100,8 @@ class Game:
         if(direct):
             new_Section = easy[0]
         else:
-            new_Section = easy[0]
-            #(Randomly select it)
+            new_Section = easy[rd.randrange(0, 5)]
+            print(new_Section)
 
         start_X = 0; start_Y = 0; width_pt = 0
         for y in range(0, len(new_Section) - 1) :

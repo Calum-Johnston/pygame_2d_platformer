@@ -1,0 +1,4 @@
+Player will move to top of platform on collision
+Player too big
+
+ERROR!!! Calculating

@@ -8,7 +8,7 @@ class Camera():
 
     def update(self, player, objects):
         # Move camera upward if player is moving update
-        if player.rect.top <= HEIGHT * 0.25:
+        if player.rect.top <= HEIGHT * 0.3:
             player.position.y += abs(player.velocity.y)
             for obj in objects:
                 obj.rect.y += abs(player.velocity.y)

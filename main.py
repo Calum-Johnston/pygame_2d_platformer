@@ -21,10 +21,10 @@ pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 clock = pygame.time.Clock()
 
+# Read in pre-built platform sections
 easy = []
 medium = []
 hard = []
-
 for x in range(0, 5):
     with open("sections/easy/easy_%i.txt" % (x + 1)) as textFile:
         easy.append([line.split() for line in textFile])
@@ -41,26 +41,23 @@ class Game:
     """ Constructor. Create all our attributes and initialize
         the game. """    
     def __init__(self):
+        # Define the player's score
         self.score = 0
-        self.fileAmountRead = 1
-        self.fileAmountToRead = 25
-
         # Define groups
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
-
         # Define player
         self.player = Player(WIDTH / 2, HEIGHT - 40, 40, 50, self)
         self.player_sprites.add(self.player)
-
         # Define starting platforms
         self.loadNewPlatforms(True)
         self.loadNewPlatforms(False)
-
+        self.distanceToNextBuild = HEIGHT
         # Create the camera
         self.camera = Camera()
-
+        # Run the game
         self.run()
+
 
     """ Runs the game. Defines the main game loop. """ 
     def run(self):
@@ -92,16 +89,28 @@ class Game:
         if(self.player.rect.top > HEIGHT):
             self.gameinstance = False
 
-        if self.camera.distanceMoved > HEIGHT:
-            self.loadNewPlatforms(False)
+        # Generate next part of level (both randomly & prebuilt)
+        if self.camera.distanceMoved > self.distanceToNextBuild:
+            if(rd.randrange(0, 20) < 1):
+                self.loadNewPlatforms(False)
+            else:
+                self.buildRandomPlatforms()
             self.camera.distanceMoved = 0
 
-    def loadNewPlatforms(self, direct):
-        if(direct):
-            new_Section = easy[0]
-        else:
-            new_Section = easy[rd.randrange(0, 5)]
-            print(new_Section)
+
+    """ Display everything to the screen for the game. """
+    def draw(self):
+        screen.fill(BLUE)
+        self.player_sprites.draw(screen)
+        self.platform_sprites.draw(screen)
+        pygame.display.flip()
+
+
+    """ Loads pre-built platforms into the game (just out of view)
+        based on textfiles read in previously. """
+    def loadNewPlatforms(self, newGame):
+        if(newGame): new_Section = easy[0]
+        else: new_Section = easy[0] # rd.randrange(0, 5)
 
         start_X = 0; start_Y = 0; width_pt = 0
         for y in range(0, len(new_Section) - 1) :
@@ -111,20 +120,40 @@ class Game:
                         start_X  = x * 20 - 20; start_Y = y * 20 - 20
                     if(new_Section[y][0][x] == "x" and new_Section[y][0][x + 1] != "x"):
                         width_pt = (x * 20) - start_X
-                        if(direct):
-                            self.pt = Platform(start_X, start_Y, width_pt, 20, self.player)
-                        else:
-                            self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.player)
+                        if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self.player)
+                        else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.player)
                         self.platform_sprites.add(self.pt)
 
+        self.distanceToNextBuild = HEIGHT
+    
+    
+    """ Bulids random platforms to cushion prebuilt platforms - gives
+        the appearance of entirely randomised level. """
+    def buildRandomPlatforms(self):
+        # Get closest platform
+        closestPlatform_Distance = 1000
+        for pt in self.platform_sprites:
+            if(pt.rect.top < closestPlatform_Distance):
+                closestPlatform_Distance = pt.rect.top
+        
+        self.distanceToNextBuild = closestPlatform_Distance
+
+        for _ in range(0, rd.randrange(0, 6)):
+            width = rd.randrange(40, 100)
+            x = rd.randrange(0, WIDTH - width)
+            print(closestPlatform_Distance - 130)
+            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 0))  # 60 is arbitrary, 130 is based on jump height
+            pt = Platform(x, y, width, 20, self.player)
+            self.platform_sprites.add(pt)
+            
+            closestPlatform_Distance = y # Reset y, and restart
+        
+        self.distanceToNextBuild -= closestPlatform_Distance 
+        self.distanceToNextBuild - 10
 
 
-    """ Display everything to the screen for the game. """
-    def draw(self):
-        screen.fill(BLUE)
-        self.player_sprites.draw(screen)
-        self.platform_sprites.draw(screen)
-        pygame.display.flip()
+        
+        
 
 
 class splashScreen():

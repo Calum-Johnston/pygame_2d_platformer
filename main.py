@@ -136,21 +136,21 @@ class Game:
             if(pt.rect.top < closestPlatform_Distance):
                 closestPlatform_Distance = pt.rect.top
         
-        self.distanceToNextBuild = closestPlatform_Distance
+        firstPositionY = 0
 
-        for _ in range(0, rd.randrange(0, 6)):
+        for x in range(0, rd.randrange(0, 6)):
             width = rd.randrange(40, 100)
             x = rd.randrange(0, WIDTH - width)
             print(closestPlatform_Distance - 130)
-            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 0))  # 60 is arbitrary, 130 is based on jump height
+            y = rd.randrange(closestPlatform_Distance - 130, min(closestPlatform_Distance - 60, 0))  # 60 is arbitrary, 130 is based on jump height
             pt = Platform(x, y, width, 20, self.player)
             self.platform_sprites.add(pt)
+            if(x == 0):
+                firstPositionY = y
             
             closestPlatform_Distance = y # Reset y, and restart
         
-        self.distanceToNextBuild -= closestPlatform_Distance 
-        self.distanceToNextBuild - 10
-
+        self.distanceToNextBuild = abs(firstPositionY - closestPlatform_Distance)
 
         
         

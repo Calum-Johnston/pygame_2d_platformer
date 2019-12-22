@@ -30,14 +30,20 @@ class Game:
         self.platform_sprites = pygame.sprite.Group()
 
         # Define player
-        self.player = Player(self)
+        self.player = Player(WIDTH / 2, HEIGHT - 40, 20, 25, self)
         self.all_sprites.add(self.player)
         self.player_sprites.add(self.player)
 
         # Define platforms
-        self.pt = Platform(0, HEIGHT-40, WIDTH, 40)
+        self.pt = Platform(0, HEIGHT-40, WIDTH, 40, self.player)
         self.all_sprites.add(self.pt)
         self.platform_sprites.add(self.pt)
+
+        platforms = [[100, 300, 150, 20], [10, 200, 50, 20], [150, 100, 100, 20]]
+        for pt in platforms:
+            self.newPt = Platform(*pt, self.player)
+            self.all_sprites.add(self.newPt)
+            self.platform_sprites.add(self.newPt)
 
         self.run()
 
@@ -64,6 +70,10 @@ class Game:
         updates positions and checks for collisions. """
     def update(self):
         self.all_sprites.update()
+        if(self.player.rect.top <= HEIGHT * 0.25):
+            self.player.pos.y += abs(self.player.velocity.y)
+            for pt in self.platform_sprites:
+                pt.rect.y += abs(self.player.velocity.y)
 
 
     """ Display everything to the screen for the game. """
@@ -71,6 +81,7 @@ class Game:
         screen.fill(BLUE)
         self.all_sprites.draw(screen)
         pygame.display.flip()
+
 
 class startScreen:
     def __init__(self):

@@ -5,7 +5,7 @@ vec = pygame.math.Vector2
 ''' PLAYER SPRITE '''
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, game):
+    def __init__(self, player_X, player_Y, player_Width, player_Height, game):
         # Call the parent class (Sprite) constructor
         super().__init__()
 
@@ -13,15 +13,15 @@ class Player(pygame.sprite.Sprite):
         self.game = game
         
         # Define the image size, color, etc
-        self.image = pygame.Surface([20, 25])
+        self.image = pygame.Surface([player_Width, player_Height])
         self.image.fill(MAGNETA)
  
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.rect.midbottom = (player_X, player_Y)
 
         # Define initial position, velocity, acceleration for player
-        self.pos = (WIDTH / 2, HEIGHT / 2)
+        self.pos = self.rect.midbottom
         self.velocity = vec(0, 0)
         self.acceleration = vec(0, 0)
 
@@ -63,17 +63,20 @@ class Player(pygame.sprite.Sprite):
         self.rect.midbottom = self.pos
 
     def jump(self):
-        # Check if we are standing on an object
         self.rect.y += 1
         collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
         self.rect.y -= 1
-        if(collision):
-            self.velocity.y = -13
+        print(self.velocity.y)
+        # If the player is on an object and not already in motion
+        if(collision and self.velocity.y == 0):
+            self.velocity.y = -12
 
-''' PLATFORM SPRITE '''
+
+    
+''' PLATFORM SPRITE (child of SceneObject) '''
 class Platform(pygame.sprite.Sprite):
 
-    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height):
+    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, player):
         super().__init__()
         # Define the image size, color, etc
         self.image = pygame.Surface([plat_Width, plat_Height])
@@ -83,3 +86,24 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = plat_X
         self.rect.y = plat_Y
+
+        # Define player (for use in scrolling the screen)
+        self.player = player
+
+
+''' ENEMY SPRITE (child of SceneObject) '''
+class Enemy(pygame.sprite.Sprite):
+
+    def __init__(self, enemy_X, enemy_Y, enemy_Width, enemy_Height, player):
+        super().__init__()
+        # Define the image size, color, etc
+        self.image = pygame.Surface([enemy_Width, enemy_Height])
+        self.image.fill(RED)
+ 
+        # Fetch the rectangle object that has the dimensions of the image.
+        self.rect = self.image.get_rect()
+        self.rect.x = enemy_X
+        self.rect.y = enemy_Y
+
+        # Define player (for use in scrolling the screen)
+        self.player = player

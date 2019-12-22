@@ -25,6 +25,7 @@ class Game:
     def __init__(self):
         self.score = 0
 
+        # Define groups
         self.all_sprites = pygame.sprite.Group()
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
@@ -70,10 +71,14 @@ class Game:
         updates positions and checks for collisions. """
     def update(self):
         self.all_sprites.update()
+
+        # Scroll the screen (done here for simplicity)
         if(self.player.rect.top <= HEIGHT * 0.25):
             self.player.pos.y += abs(self.player.velocity.y)
             for pt in self.platform_sprites:
                 pt.rect.y += abs(self.player.velocity.y)
+                if(pt.rect.top >= HEIGHT):
+                    pt.kill()
 
 
     """ Display everything to the screen for the game. """
@@ -83,12 +88,58 @@ class Game:
         pygame.display.flip()
 
 
-class startScreen:
-    def __init__(self):
-        pass
+class splashScreen():
+    def __init__(self, typeScreen):
+        if typeScreen == "Start":
+            #self.startSplash()
+            pass
+        elif typeScreen == "End":
+            self.endSplash()
+
+    def startSplash(self):
+        self.drawStartSplash()
+        self.wait = True
+        while(self.wait):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    wait = False
+                    running = False
+                if event.type == pygame.KEYUP:
+                    wait = False
+            clock.tick(FPS)
+
+    def endSplash(self):
+        self.drawEndSplash()
+        self.wait = True
+        while(self.wait):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.wait = False
+                    running = False
+                if event.type == pygame.KEYUP:
+                    print("hi")
+                    self.wait = False
+            clock.tick(FPS)
+    
+    def drawEndSplash(self):
+        screen.fill(BLACK)
+        self.drawText("Game Over", WIDTH / 2, HEIGHT / 2, 36, WHITE)
+        self.drawText("Press any key to start again", WIDTH / 2, HEIGHT * 5 / 8, 24, WHITE)
+        pygame.display.flip()
+
+    def drawText(self, text, text_X, text_Y, text_Size, text_Colour):
+        font = pygame.font.Font(None, text_Size)
+        text = font.render(text, True, text_Colour)
+        text_rect = text.get_rect()
+        text_rect.center = (text_X, text_Y)
+        screen.blit(text, text_rect)
+
+
+
 
 running = True
 while(running):
-    startScreen()
+    splashScreen("Start")
     game = Game()
+    running = splashScreen("End")
 

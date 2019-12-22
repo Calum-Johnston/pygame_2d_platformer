@@ -3,6 +3,9 @@
 import pygame
 from settings import *
 from sprites import Player, Platform
+from camera import Camera
+import random as rd
+import math
 
 # Defines global variables
 global screen
@@ -18,33 +21,44 @@ pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 clock = pygame.time.Clock()
 
+easy = []
+medium = []
+hard = []
+
+for x in range(1, 6):
+    with open("sections/easy/easy_%i.txt" % x) as textFile:
+        easy.append([line.split() for line in textFile])
+    with open("sections/medium/medium_%i.txt" % x) as textFile:
+        medium.append([line.split() for line in textFile])
+    with open("sections/hard/hard_%i.txt" % x) as textFile:
+        hard.append([line.split() for line in textFile])
+
+
+
+
 
 class Game:
     """ Constructor. Create all our attributes and initialize
         the game. """    
     def __init__(self):
         self.score = 0
+        self.fileAmountRead = 1
+        self.fileAmountToRead = 25
 
         # Define groups
-        self.all_sprites = pygame.sprite.Group()
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
 
         # Define player
-        self.player = Player(WIDTH / 2, HEIGHT - 40, 20, 25, self)
-        self.all_sprites.add(self.player)
+        self.player = Player(WIDTH / 2, HEIGHT - 40, 40, 50, self)
         self.player_sprites.add(self.player)
 
-        # Define platforms
-        self.pt = Platform(0, HEIGHT-40, WIDTH, 40, self.player)
-        self.all_sprites.add(self.pt)
-        self.platform_sprites.add(self.pt)
+        # Define starting platforms
+        self.loadNewPlatforms(True)
+        self.loadNewPlatforms(False)
 
-        platforms = [[100, 300, 150, 20], [10, 200, 50, 20], [150, 100, 100, 20]]
-        for pt in platforms:
-            self.newPt = Platform(*pt, self.player)
-            self.all_sprites.add(self.newPt)
-            self.platform_sprites.add(self.newPt)
+        # Create the camera
+        self.camera = Camera()
 
         self.run()
 
@@ -61,7 +75,7 @@ class Game:
     """ Process all of the events. Return a "True" if we need
         to close the window. """
     def events(self):
-        for event in pygame.event.get():
+        for event in pygame.event.get(): 
             if event.type == pygame.QUIT:
                 running = False
                 self.gameinstance = False
@@ -70,25 +84,46 @@ class Game:
     """ This method is run each time through the frame. It
         updates positions and checks for collisions. """
     def update(self):
-        self.all_sprites.update()
-
-        # Scroll the screen (done here for simplicity)
-        if(self.player.rect.top <= HEIGHT * 0.25):
-            self.player.pos.y += abs(self.player.velocity.y)
-            for pt in self.platform_sprites:
-                pt.rect.y += abs(self.player.velocity.y)
-                if(pt.rect.top >= HEIGHT):
-                    pt.kill()
+        # Update player sprite and then camera
+        self.player_sprites.update()
+        self.camera.update(self.player, self.platform_sprites)
 
         # If player falls out of the screen, end game
         if(self.player.rect.top > HEIGHT):
             self.gameinstance = False
 
+        if self.camera.distanceMoved > HEIGHT:
+            self.loadNewPlatforms(False)
+            self.camera.distanceMoved = 0
+
+    def loadNewPlatforms(self, direct):
+        if(direct):
+            new_Section = easy[0]
+        else:
+            new_Section = easy[0]
+            #(Randomly select it)
+
+        start_X = 0; start_Y = 0; width_pt = 0
+        for y in range(0, len(new_Section) - 1) :
+            for x in range(0, len(new_Section[y][0]) - 1):
+                if(new_Section[y][0][x] != "#"):
+                    if(new_Section[y][0][x] == "x" and new_Section[y][0][x - 1] != "x"):
+                        start_X  = x * 20 - 20; start_Y = y * 20 - 20
+                    if(new_Section[y][0][x] == "x" and new_Section[y][0][x + 1] != "x"):
+                        width_pt = (x * 20) - start_X
+                        if(direct):
+                            self.pt = Platform(start_X, start_Y, width_pt, 20, self.player)
+                        else:
+                            self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.player)
+                        self.platform_sprites.add(self.pt)
+
+
 
     """ Display everything to the screen for the game. """
     def draw(self):
         screen.fill(BLUE)
-        self.all_sprites.draw(screen)
+        self.player_sprites.draw(screen)
+        self.platform_sprites.draw(screen)
         pygame.display.flip()
 
 
@@ -125,9 +160,7 @@ class splashScreen():
                 if event.type == pygame.QUIT:
                     self.wait = False
                     running = False
-                    print(running)
                 if event.type == pygame.KEYUP:
-                    print("hi")
                     self.wait = False
             clock.tick(FPS)
     

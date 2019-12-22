@@ -1,14 +1,15 @@
 # Game settings
 Title = "University Project"
-WIDTH = 300
-HEIGHT = 450
+WIDTH = 280
+HEIGHT = 500
 FPS = 60
+MAX_PLATFORMS_WITHIN_JUMP = 3
+MAX_DISTANCE_UP = 130
 
 # Player settings
 PLAYER_ACCELERATION = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAVITY = 0.5
-
 
 # Colours
 WHITE = (255, 255, 255)

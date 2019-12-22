@@ -80,6 +80,10 @@ class Game:
                 if(pt.rect.top >= HEIGHT):
                     pt.kill()
 
+        # If player falls out of the screen, end game
+        if(self.player.rect.top > HEIGHT):
+            self.gameinstance = False
+
 
     """ Display everything to the screen for the game. """
     def draw(self):
@@ -91,8 +95,7 @@ class Game:
 class splashScreen():
     def __init__(self, typeScreen):
         if typeScreen == "Start":
-            #self.startSplash()
-            pass
+            self.startSplash()
         elif typeScreen == "End":
             self.endSplash()
 
@@ -102,11 +105,17 @@ class splashScreen():
         while(self.wait):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    wait = False
+                    self.wait = False
                     running = False
                 if event.type == pygame.KEYUP:
-                    wait = False
+                    self.wait = False
             clock.tick(FPS)
+
+    def drawStartSplash(self):
+        screen.fill(BLACK)
+        self.drawText("Start Game!", WIDTH / 2, HEIGHT / 2, 36, WHITE)
+        self.drawText("Press any key to start!", WIDTH / 2, HEIGHT * 5 / 8, 24, WHITE)
+        pygame.display.flip()
 
     def endSplash(self):
         self.drawEndSplash()
@@ -116,6 +125,7 @@ class splashScreen():
                 if event.type == pygame.QUIT:
                     self.wait = False
                     running = False
+                    print(running)
                 if event.type == pygame.KEYUP:
                     print("hi")
                     self.wait = False
@@ -141,5 +151,5 @@ running = True
 while(running):
     splashScreen("Start")
     game = Game()
-    running = splashScreen("End")
+    splashScreen("End")
 

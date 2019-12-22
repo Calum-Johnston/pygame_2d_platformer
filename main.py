@@ -137,23 +137,20 @@ class Game:
                 closestPlatform_Distance = pt.rect.top
         
         firstPositionY = 0
-
         for x in range(0, rd.randrange(0, 6)):
-            width = rd.randrange(40, 100)
+            width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
-            print(closestPlatform_Distance - 130)
             y = rd.randrange(closestPlatform_Distance - 130, min(closestPlatform_Distance - 60, 0))  # 60 is arbitrary, 130 is based on jump height
             pt = Platform(x, y, width, 20, self.player)
             self.platform_sprites.add(pt)
             if(x == 0):
                 firstPositionY = y
-            
             closestPlatform_Distance = y # Reset y, and restart
         
         self.distanceToNextBuild = abs(firstPositionY - closestPlatform_Distance)
 
-        
-        
+
+
 
 
 class splashScreen():
@@ -208,7 +205,7 @@ class splashScreen():
 
 
 
-
+# Main program
 running = True
 while(running):
     splashScreen("Start")

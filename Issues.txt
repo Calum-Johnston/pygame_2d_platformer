@@ -9,3 +9,6 @@ FIXED:
   final new built plat (off-screen)
 Because of this, the camera would have to move a little further each time before generating
 new platforms, and eventually it wouldn't generate them within range.
+
+Possbily implement equation to calculate max jump height (for platform gen.)
+Issue here - To do with checking for collision and resetting y value

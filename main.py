@@ -83,6 +83,7 @@ class Game:
     def update(self):
         # Update player sprite and then camera
         self.player_sprites.update()
+        self.platform_sprites.update()
         self.camera.update(self.player, self.platform_sprites)
 
         # If player falls out of the screen, end game

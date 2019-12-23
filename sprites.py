@@ -1,5 +1,6 @@
 import pygame
 from settings import *
+import random as rd
 vec = pygame.math.Vector2
 
 ''' PLAYER SPRITE '''
@@ -72,7 +73,7 @@ class Player(pygame.sprite.Sprite):
 
 
     
-''' PLATFORM SPRITE (child of SceneObject) '''
+''' PLATFORM SPRITE '''
 class Platform(pygame.sprite.Sprite):
 
     def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, player):
@@ -88,9 +89,24 @@ class Platform(pygame.sprite.Sprite):
         # Define player (for use in scrolling the screen)
         self.player = player
 
+        # Is the platform going to be moving?
+        self.movingX = 0
+        self.velocity = vec(0, 0)
+        if(rd.randrange(0, 10) == 0):
+            self.movingX = 1
+        
+        # Define 
+
+    def update(self):
+        if(self.movingX != 0):
+            if(self.rect.right >= WIDTH):
+                self.movingX = -1
+            if(self.rect.left <= 0):
+                self.movingX = 1
+            self.rect.x += self.movingX
 
 
-''' ENEMY SPRITE (child of SceneObject) '''
+''' ENEMY SPRITE '''
 class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, enemy_X, enemy_Y, enemy_Width, enemy_Height, player):

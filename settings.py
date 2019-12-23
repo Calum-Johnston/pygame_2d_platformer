@@ -12,6 +12,7 @@ PLAYER_FRICTION = -0.12
 PLAYER_GRAVITY = 0.5
 
 # Platform settings
+PLATFORM_MOVING_CHANCE = 10
 PLATFORM_MOVING_SPEED = 1
 
 # Random Generation Settings

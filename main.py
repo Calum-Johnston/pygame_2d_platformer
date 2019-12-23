@@ -130,6 +130,7 @@ class Game:
     
     """ Bulids random platforms to cushion prebuilt platforms - gives
         the appearance of entirely randomised level. """
+    # ONLY FUNCTION I WANT TO IMPROVE
     def buildRandomPlatforms(self):
         # Get closest platform
         closestPlatform_Distance = 1000
@@ -141,7 +142,8 @@ class Game:
         for x in range(0, rd.randrange(0, 6)):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
-            y = rd.randrange(closestPlatform_Distance - 130, min(closestPlatform_Distance - 60, 0))  # 60 is arbitrary, 130 is based on jump height
+            # Min's used to ensure no errors
+            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 1))  # 60 is arbitrary, 130 is based on jump height
             pt = Platform(x, y, width, 20, self.player)
             self.platform_sprites.add(pt)
             if(x == 0):

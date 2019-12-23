@@ -32,9 +32,9 @@ class Player(pygame.sprite.Sprite):
         
         # Determine whether the player is accelerating
         keysPressed = pygame.key.get_pressed()
-        if(keysPressed[pygame.K_RIGHT]): 
+        if(keysPressed[pygame.K_RIGHT] or keysPressed[pygame.K_d]): 
             self.acceleration.x = PLAYER_ACCELERATION
-        if(keysPressed[pygame.K_LEFT]): 
+        if(keysPressed[pygame.K_LEFT] or keysPressed[pygame.K_a]): 
             self.acceleration.x = -PLAYER_ACCELERATION
         if(keysPressed[pygame.K_SPACE]):
             self.jump()
@@ -90,21 +90,20 @@ class Platform(pygame.sprite.Sprite):
         self.player = player
 
         # Is the platform going to be moving?
-        self.movingX = 0
-        self.velocity = vec(0, 0)
-        if(rd.randrange(0, 10) == 0):
-            self.movingX = 1
-        
-        # Define 
+        self.movingX = False
+        self.movingX_Speed = PLATFORM_MOVING_SPEED
+        if(rd.randrange(0, PLATFORM_MOVING_CHANCE) == 0):
+            self.movingX = True
+ 
 
     def update(self):
-        if(self.movingX != 0):
+        # If platform moves horizontally, move it
+        if(self.movingX):
             if(self.rect.right >= WIDTH):
-                self.movingX = -1
+                self.movingX_Speed= -1
             if(self.rect.left <= 0):
-                self.movingX = 1
-            self.rect.x += self.movingX
-
+                self.movingX_Speed = 1
+            self.rect.x += self.movingX_Speed
 
 ''' ENEMY SPRITE '''
 class Enemy(pygame.sprite.Sprite):

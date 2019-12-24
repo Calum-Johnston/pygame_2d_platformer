@@ -56,7 +56,7 @@ class Game:
         self.loadNewPlatforms(False)
         self.distanceToNextBuild = HEIGHT
         # Create the camera
-        self.camera = Camera()
+        self.camera = Camera(self)
         # Run the game
         self.run()
 
@@ -112,6 +112,7 @@ class Game:
         screen.fill(BLUE)
         self.platform_sprites.draw(screen)
         self.player_sprites.draw(screen)
+        self.drawText("Score: " + str(self.score), 50, 20, 36, BLACK)
         pygame.display.flip()
 
 
@@ -159,6 +160,15 @@ class Game:
             closestPlatform_Distance = y # Reset y, and restart
         
         self.distanceToNextBuild = abs(firstPositionY - closestPlatform_Distance)
+
+
+    """ Draws text onto the screen """
+    def drawText(self, text, text_X, text_Y, text_Size, text_Colour):
+        font = pygame.font.Font(None, text_Size)
+        text = font.render(text, True, text_Colour)
+        text_rect = text.get_rect()
+        text_rect.center = (text_X, text_Y)
+        screen.blit(text, text_rect)
 
 
 

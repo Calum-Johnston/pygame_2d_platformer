@@ -21,7 +21,7 @@ Still to do:
 - Create proper start/end screens
 
 - General improvements to code, design, layout!!!
-- Make it so transform.scale is relative to size
+- Make it so transform.scale is relative to size (in spritesheet class)
 
 ISSUES:
 - Not sure why both distanceToNextBuild in buildRandomPlatforms() works

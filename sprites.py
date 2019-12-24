@@ -98,7 +98,6 @@ class Player(pygame.sprite.Sprite):
     def animate(self):
         self.updateStates()
         if(self.idle):
-            print("IDLE")
             if(self.tickCount > 30):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.idle_frames)
@@ -107,7 +106,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.midbottom = (currentX, currentY)
         elif(self.walking):
-            print("WALKING")
             if(self.tickCount > 15):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.walking_frames_r)
@@ -117,7 +115,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.midbottom = (currentX, currentY)
         elif(self.jumping):
-            print("JUMPING")
             if(self.tickCount > 15):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.jumping_frames)
@@ -167,6 +164,8 @@ class Player(pygame.sprite.Sprite):
 
         # Update jumping frames
         self.jumping_frames.append(self.game.player_spritesheet.getImageAt(768, 256, 128, 256))
+    
+
     
 ''' PLATFORM SPRITE '''
 class Platform(pygame.sprite.Sprite):

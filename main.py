@@ -2,7 +2,7 @@
 
 import pygame
 from settings import *
-from sprites import Player, Platform
+from sprites import Player, Platform, Enemy
 from utilities import Camera, SpriteSheet
 import random as rd
 import math
@@ -43,20 +43,33 @@ class Game:
     def __init__(self):
         # Define the player's score
         self.score = 0
+
         # Read in data files
         self.loadData()
+
         # Define groups
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
+        self.enemy_sprites = pygame.sprite.Group()
+        self.object_sprites = pygame.sprite.Group()
+
         # Define player
         self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)
         self.player_sprites.add(self.player)
+
         # Define starting platforms
         self.loadNewPlatforms(True)
         self.loadNewPlatforms(False)
         self.distanceToNextBuild = HEIGHT
+
+        # Define first enemy (test)
+        self.enemy = Enemy(WIDTH / 2, HEIGHT / 2, 40, 50, self)
+        self.enemy_sprites.add(self.enemy)
+        self.object_sprites.add(self.enemy)
+
         # Create the camera
         self.camera = Camera(self)
+
         # Run the game
         self.run()
 
@@ -92,7 +105,8 @@ class Game:
         # Update player sprite and then camera
         self.player_sprites.update()
         self.platform_sprites.update()
-        self.camera.update(self.player, self.platform_sprites)
+        self.enemy_sprites.update()
+        self.camera.update(self.player, self.object_sprites)
 
         # If player falls out of the screen, end game
         if(self.player.rect.top > HEIGHT):
@@ -111,6 +125,7 @@ class Game:
     def draw(self):
         screen.fill(BLUE)
         self.platform_sprites.draw(screen)
+        self.enemy_sprites.draw(screen)
         self.player_sprites.draw(screen)
         self.drawText("Score: " + str(self.score), 50, 20, 36, BLACK)
         pygame.display.flip()
@@ -133,6 +148,7 @@ class Game:
                         if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self.player)
                         else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.player)
                         self.platform_sprites.add(self.pt)
+                        self.object_sprites.add(self.pt)
 
         self.distanceToNextBuild = HEIGHT
     
@@ -151,10 +167,10 @@ class Game:
         for x in range(0, 6):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
-            # Min's used to ensure no errors
             y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 1))  # 60 is arbitrary, 130 is based on jump height
             pt = Platform(x, y, width, 20, self.player)
             self.platform_sprites.add(pt)
+            self.object_sprites.add(pt)
             if(x == 0):
                 firstPositionY = y
             closestPlatform_Distance = y # Reset y, and restart

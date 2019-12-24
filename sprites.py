@@ -145,7 +145,6 @@ class Player(pygame.sprite.Sprite):
         else:
             self.jumping = False
         
-
     def loadImages(self):
         self.idle_frames = []
         self.walking_frames_r = []
@@ -166,7 +165,7 @@ class Player(pygame.sprite.Sprite):
         self.jumping_frames.append(self.game.player_spritesheet.getImageAt(768, 256, 128, 256))
     
 
-    
+
 ''' PLATFORM SPRITE '''
 class Platform(pygame.sprite.Sprite):
 
@@ -192,10 +191,8 @@ class Platform(pygame.sprite.Sprite):
     def update(self):
         # If platform moves horizontally, move it
         if(self.movingX):
-            if(self.rect.right >= WIDTH):
-                self.movingX_Speed= -1
-            if(self.rect.left <= 0):
-                self.movingX_Speed = 1
+            if(self.rect.right > WIDTH or self.rect.left < 0):
+                self.movingX_Speed= -self.movingX_Speed
             self.rect.x += self.movingX_Speed
 
 
@@ -214,5 +211,17 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = enemy_X
         self.rect.y = enemy_Y
 
+        # Define velocity varaible
+        self.velocity = vec(1, 0)
+
         # Define player (for use in scrolling the screen)
         self.player = player
+
+    def update(self):
+        # Enemy will bounce off the wall
+        if(self.rect.right > WIDTH or self.rect.left < 0):
+            self.velocity.x = -self.velocity.x
+        self.rect.x += self.velocity.x
+        print(self.velocity.x)
+        print(self.rect.x)
+

@@ -40,15 +40,13 @@ class Player(pygame.sprite.Sprite):
         self.acceleration = vec(0, 0)
 
     def update(self):
-        # Update current image of sprite
-        self.animate()
 
         # Default acceleration is 0 (x-direction) and GRAVITY (y-direction)
         self.acceleration = vec(0, PLAYER_GRAVITY)  # i.e. always accelerting downwards unless changed later
         
         # Default crouching to False, so you only crouch when the key is pressed
         self.crouching = False
-        
+
         # Determine the key pressed
         keysPressed = pygame.key.get_pressed()
         if(keysPressed[pygame.K_RIGHT] or keysPressed[pygame.K_d]): 
@@ -77,21 +75,11 @@ class Player(pygame.sprite.Sprite):
         if(self.position.x < 0):
             self.position.x = WIDTH
 
-        self.checkCollisions()
-        #Check for collison (only if moving downward)
-        if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
-            collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
-            if(collision):
-                self.platform = collision[0]
-                for pt in collision:
-                    if(pt.rect.bottom > self.platform.rect.bottom):
-                        self.platform = pt
-                if(self.platform.rect.bottom > self.rect.bottom): 
-                    self.position.y = self.platform.rect.top + 1
-                    self.velocity.y = 0
-
         # Updates player position (keep track of bottom, since this is used in collisons)
         self.rect.midbottom = self.position
+
+        self.checkCollisions()
+        self.animate()
 
         # Update the tick count 
         self.tickCount += 1
@@ -109,7 +97,7 @@ class Player(pygame.sprite.Sprite):
                     self.position.y = self.platform.rect.top + 1
                     self.velocity.y = 0
     
-        # Check for Mob Collision
+        # Check for ENEMY Collision
         collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         if(collision):
             self.game.gameinstance = False
@@ -119,7 +107,7 @@ class Player(pygame.sprite.Sprite):
         collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
         self.rect.y -= 1
         # If the player is on an object and not already in motion
-        if(collision and self.velocity.y == 0):
+        if(collision and not self.jumping):
             self.velocity.y = -13
 
     def animate(self):
@@ -173,54 +161,73 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.walking = False
 
-        # Update jumping state
+        # Update jumping state (more complicated)
         if(self.velocity.y != 0):
             self.jumping = True
-        elif(self.velocity.y == 0.5 and len(pygame.sprite.spritecollide(self, self.game.platform_sprites, False)) == 0): 
-            self.jumping = True
         else:
-            self.jumping = False
+            collisions = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
+            if(len(collisions) == 0):
+                self.jumping = True
+            else:
+                platform = collisions[0]
+                for pt in collisions:
+                    if(pt.rect.bottom > platform.rect.bottom):
+                        platform = pt
+                if(platform.rect.bottom > self.rect.bottom):
+                    self.jumping = False
+                else:
+                    self.jumping = True
         
     def loadImages(self):
+
         self.idle_frames = []
         self.walking_frames_r = []
         self.walking_frames_l = []
         self.jumping_frames = []
         self.crouching_frames = []
+
+        scaleWidth = WIDTH // 6
+        scaleHeight = HEIGHT // 6
         
         # Update idle frame
-        self.idle_frames.append(self.game.player_spritesheet.getImageAt(768, 0, 128, 256))
-        self.idle_frames.append(self.game.player_spritesheet.getImageAt(768, 768, 128, 256))
+        self.idle_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 0, 128, 256), (scaleWidth, scaleHeight)))
+        self.idle_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 768, 128, 256), (scaleWidth, scaleHeight)))
 
         # Update walking frames
-        self.walking_frames_r.append(self.game.player_spritesheet.getImageAt(640, 1280, 128, 256))
-        self.walking_frames_r.append(self.game.player_spritesheet.getImageAt(640, 1024, 128, 256))
-        self.walking_frames_l.append(pygame.transform.flip(self.game.player_spritesheet.getImageAt(640, 1280, 128, 256), True, False))
-        self.walking_frames_l.append(pygame.transform.flip(self.game.player_spritesheet.getImageAt(640, 1024, 128, 256), True, False))
+        self.walking_frames_r.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(640, 1280, 128, 256), (scaleWidth, scaleHeight)))
+        self.walking_frames_r.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(640, 1024, 128, 256), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.player_spritesheet.getImageAt(640, 1280, 128, 256), True, False), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.player_spritesheet.getImageAt(640, 1024, 128, 256), True, False), (scaleWidth, scaleHeight)))
 
         # Update jumping frames
-        self.jumping_frames.append(self.game.player_spritesheet.getImageAt(768, 256, 128, 256))
+        self.jumping_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 256, 128, 256), (scaleWidth, scaleHeight)))
 
         # Update crouching frames
-        self.crouching_frames.append(self.game.player_spritesheet.getImageAt(768, 1024, 128, 256))
+        self.crouching_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 1024, 128, 256), (scaleWidth, scaleHeight)))
     
 
 
 ''' PLATFORM SPRITE '''
 class Platform(pygame.sprite.Sprite):
 
-    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, player):
+    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, game):
         super().__init__()
-        # Define the image size, color, etc
-        self.image = pygame.Surface([plat_Width, plat_Height])
-        self.image.fill(YELLOW)
- 
+
+        # Set the game instance
+        self.game = game
+
+        # Load in potential platforms
+        self.loadImages()
+
+        # Determine image
+        self.image = pygame.transform.scale(self.platform_frames[0], (plat_Width, plat_Height))
+
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
         self.rect.topleft = (plat_X, plat_Y)
 
-        # Define player (for use in scrolling the screen)
-        self.player = player
+        # Define the mask (for collision)
+        self.mask = pygame.mask.from_surface(self.image)
 
         # Is the platform going to be moving?
         self.movingX = False
@@ -234,6 +241,11 @@ class Platform(pygame.sprite.Sprite):
             if(self.rect.right > WIDTH or self.rect.left < 0):
                 self.movingX_Speed= -self.movingX_Speed
             self.rect.x += self.movingX_Speed
+
+    def loadImages(self):
+        self.platform_frames = []
+        self.platform_frames.append(self.game.platform_spritesheet.getImageAt(128, 128, 128, 128)) #Full
+        #self.platform_frames.append(self.game.platform_spritesheet.getImageAt(0, 1024, 128, 128)) #Full
 
 
 
@@ -293,8 +305,11 @@ class Enemy(pygame.sprite.Sprite):
         self.walking_frames_r = []
         self.walking_frames_l = []
 
+        scaleWidth = WIDTH // 4
+        scaleHeight = HEIGHT // 8
+
         # Update walking frames
-        self.walking_frames_r.append(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128))
-        self.walking_frames_r.append(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128))
-        self.walking_frames_l.append(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False))
-        self.walking_frames_l.append(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False))
+        self.walking_frames_r.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), (scaleWidth, scaleHeight)))
+        self.walking_frames_r.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False), (scaleWidth, scaleHeight)))

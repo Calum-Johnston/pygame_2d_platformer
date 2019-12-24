@@ -145,8 +145,8 @@ class Game:
                         start_X  = x * 20 - 20; start_Y = y * 20 - 20
                     if(new_Section[y][0][x] == "x" and new_Section[y][0][x + 1] != "x"):
                         width_pt = (x * 20) - start_X
-                        if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self.player)
-                        else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.player)
+                        if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self)
+                        else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self)
                         self.platform_sprites.add(self.pt)
                         self.object_sprites.add(self.pt)
 
@@ -168,7 +168,7 @@ class Game:
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
             y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 1))  # 60 is arbitrary, 130 is based on jump height
-            pt = Platform(x, y, width, 20, self.player)
+            pt = Platform(x, y, width, 20, self)
             self.platform_sprites.add(pt)
             self.object_sprites.add(pt)
             if(x == 0):

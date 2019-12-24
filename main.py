@@ -16,7 +16,7 @@ global running
 pygame.init()
 pygame.mixer.init()     
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption(Title)
+pygame.display.set_caption(TITLE)
 pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 clock = pygame.time.Clock()
@@ -32,8 +32,6 @@ for x in range(0, 5):
         medium.append([line.split() for line in textFile])
     with open("sections/hard/hard_%i.txt" % (x + 1)) as textFile:
         hard.append([line.split() for line in textFile])
-
-
 
 
 
@@ -123,11 +121,11 @@ class Game:
 
     """ Display everything to the screen for the game. """
     def draw(self):
-        screen.fill(BLUE)
+        screen.fill(CYAN)
         self.platform_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
         self.player_sprites.draw(screen)
-        self.drawText("Score: " + str(self.score), 50, 20, 36, BLACK)
+        self.drawText("Score: " + str(self.score), 60, 20, 36, BLACK)
         pygame.display.flip()
 
 
@@ -188,8 +186,6 @@ class Game:
 
 
 
-
-
 class splashScreen():
     def __init__(self, typeScreen):
         if typeScreen == "Start":
@@ -210,9 +206,12 @@ class splashScreen():
             clock.tick(FPS)
 
     def drawStartSplash(self):
-        screen.fill(BLACK)
-        self.drawText("Start Game!", WIDTH / 2, HEIGHT / 2, 36, WHITE)
-        self.drawText("Press any key to start!", WIDTH / 2, HEIGHT * 5 / 8, 24, WHITE)
+        screen.fill(CYAN)
+        self.drawText(TITLE, WIDTH / 2, HEIGHT / 4, 40, RED)
+        self.drawText("LEFT/RIGHT = Arrow keys!", WIDTH / 2, HEIGHT / 8 * 3.5, 24, RED)
+        self.drawText("JUMP = Space bar!", WIDTH / 2, HEIGHT / 2, 24, RED)
+        self.drawText("Press any key to start!", WIDTH / 2, HEIGHT * 5 / 8, 30, RED)
+        pygame.draw.rect(screen, RED, (30, 180, 220, 100), 1)
         pygame.display.flip()
 
     def endSplash(self):

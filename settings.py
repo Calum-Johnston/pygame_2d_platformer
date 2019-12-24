@@ -1,5 +1,5 @@
 # Game settings
-Title = "University Project"
+TITLE = "University Project"
 WIDTH = 280
 HEIGHT = 500
 FPS = 60

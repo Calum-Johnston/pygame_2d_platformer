@@ -16,7 +16,6 @@ Still to do:
 - Add boosts, etc
 - Make platforms more difficult as score increases (more moving, faster moving, greater distance, etc)
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)
-- Textures for players, platforms, enemies and more
 - Create proper start/end screens
 
 - General improvements to code, design, layout!!!

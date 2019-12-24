@@ -21,11 +21,13 @@ Still to do:
 
 - General improvements to code, design, layout!!!
 - Make it so transform.scale is relative to size (in spritesheet class)
+- Could change moving off the screen
 
 ISSUES:
 - Not sure why both distanceToNextBuild in buildRandomPlatforms() works
 - Not sure why self.position.y - 2 in update() works
 - if(self.platform.rect.bottom > self.rect.bottom):  PRODUCES error because
   position is updated and then it is calculated
+- Scaling issue when reading in images
 
 

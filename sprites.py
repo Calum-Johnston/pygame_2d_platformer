@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()
 
-        # Get the game instance (for collision use)
+        # Get the game instance
         self.game = game
 
         # Load in the sprites images
@@ -69,6 +69,7 @@ class Player(pygame.sprite.Sprite):
         if(self.position.x < 0):
             self.position.x = WIDTH
 
+        self.checkCollisions()
         #Check for collison (only if moving downward)
         if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
             collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
@@ -86,6 +87,24 @@ class Player(pygame.sprite.Sprite):
 
         # Update the tick count 
         self.tickCount += 1
+
+    def checkCollisions(self):
+        #Check for PLATFORM collision
+        if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
+            collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
+            if(collision):
+                self.platform = collision[0]
+                for pt in collision:
+                    if(pt.rect.bottom > self.platform.rect.bottom):
+                        self.platform = pt
+                if(self.platform.rect.bottom > self.rect.bottom): 
+                    self.position.y = self.platform.rect.top + 1
+                    self.velocity.y = 0
+    
+        # Check for Mob Collision
+        collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False)
+        if(collision):
+            self.game.gameinstance = False
 
     def jump(self):
         self.rect.y += 1
@@ -197,14 +216,25 @@ class Platform(pygame.sprite.Sprite):
 
 
 
+
 ''' ENEMY SPRITE '''
 class Enemy(pygame.sprite.Sprite):
 
-    def __init__(self, enemy_X, enemy_Y, enemy_Width, enemy_Height, player):
+    def __init__(self, enemy_X, enemy_Y, enemy_Width, enemy_Height, game):
         super().__init__()
+
+        # Get the game instance (for collision use)
+        self.game = game
+
+        # Load in the sprites images
+        self.loadImages()
+
+        # Define variables to determine the action the player is currently taking
+        self.currentImage = 0
+        self.tickCount = 0
+
         # Define the image size, color, etc
-        self.image = pygame.Surface([enemy_Width, enemy_Height])
-        self.image.fill(RED)
+        self.image = self.walking_frames_r[0]
  
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
@@ -215,13 +245,33 @@ class Enemy(pygame.sprite.Sprite):
         self.velocity = vec(1, 0)
 
         # Define player (for use in scrolling the screen)
-        self.player = player
+        self.game = game
 
     def update(self):
+        self.animate()
         # Enemy will bounce off the wall
         if(self.rect.right > WIDTH or self.rect.left < 0):
             self.velocity.x = -self.velocity.x
         self.rect.x += self.velocity.x
-        print(self.velocity.x)
-        print(self.rect.x)
 
+    def animate(self):
+        if(self.tickCount > 15):
+            self.tickCount = 0
+            self.currentImage = (self.currentImage + 1) % len(self.walking_frames_r)
+            if(self.velocity.x > 0): self.image = self.walking_frames_r[self.currentImage]
+            else: self.image = self.walking_frames_l[self.currentImage]
+            currentX, currentY = self.rect.midbottom
+            self.rect = self.image.get_rect()
+            self.rect.midbottom = (currentX, currentY)
+
+
+
+    def loadImages(self):
+        self.walking_frames_r = []
+        self.walking_frames_l = []
+
+        # Update walking frames
+        self.walking_frames_r.append(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128))
+        self.walking_frames_r.append(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128))
+        self.walking_frames_l.append(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False))
+        self.walking_frames_l.append(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False))

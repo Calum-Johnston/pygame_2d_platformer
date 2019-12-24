@@ -34,6 +34,9 @@ class SpriteSheet():
     def getImageAt(self, x, y, width, height):
         image = pygame.Surface([width, height]).convert()
         image.blit(self.spritesheet, (0, 0), (x, y, width, height))
-        image = pygame.transform.scale(image, (WIDTH // 8, HEIGHT // 8))
+        if(width == height):
+            image = pygame.transform.scale(image, (WIDTH // 8, HEIGHT // 16))
+        else:
+            image = pygame.transform.scale(image, (WIDTH // 8, HEIGHT // 8))
         image.set_colorkey(BLACK) 
         return image

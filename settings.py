@@ -15,9 +15,15 @@ PLAYER_GRAVITY = 0.5
 PLATFORM_MOVING_CHANCE = 10
 PLATFORM_MOVING_SPEED = 1
 
-# Random Generation Settings
+# Random Generation settings
 RANDOM_WIDTH_MIN = 40
 RANDOM_WIDTH_MAX = 100
+
+# SpriteSheet settings
+PLAYER_SPRITESHEET = "spritesheet_players.png"
+ENEMY_SPRITESHEET = "spritesheet_enemies.png"
+PLATFORM_SPRITESHEET = "spritesheet_ground.png"
+
 
 # Colours
 WHITE = (255, 255, 255)

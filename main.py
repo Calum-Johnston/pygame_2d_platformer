@@ -3,7 +3,7 @@
 import pygame
 from settings import *
 from sprites import Player, Platform
-from camera import Camera
+from utilities import Camera, SpriteSheet
 import random as rd
 import math
 
@@ -43,11 +43,13 @@ class Game:
     def __init__(self):
         # Define the player's score
         self.score = 0
+        # Read in data files
+        self.loadData()
         # Define groups
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
         # Define player
-        self.player = Player(WIDTH / 2, HEIGHT - 40, 40, 50, self)
+        self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)
         self.player_sprites.add(self.player)
         # Define starting platforms
         self.loadNewPlatforms(True)
@@ -57,6 +59,12 @@ class Game:
         self.camera = Camera()
         # Run the game
         self.run()
+
+    ''' Loads in any data required for the game '''
+    def loadData(self):
+        self.player_spritesheet = SpriteSheet(PLAYER_SPRITESHEET)
+        self.enemy_spritesheet = SpriteSheet(ENEMY_SPRITESHEET)
+        self.platform_spritesheet = SpriteSheet(PLATFORM_SPRITESHEET)
 
 
     """ Runs the game. Defines the main game loop. """ 
@@ -102,8 +110,8 @@ class Game:
     """ Display everything to the screen for the game. """
     def draw(self):
         screen.fill(BLUE)
-        self.player_sprites.draw(screen)
         self.platform_sprites.draw(screen)
+        self.player_sprites.draw(screen)
         pygame.display.flip()
 
 
@@ -139,7 +147,7 @@ class Game:
                 closestPlatform_Distance = pt.rect.top
         
         firstPositionY = 0
-        for x in range(0, rd.randrange(0, 6)):
+        for x in range(0, 6):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
             # Min's used to ensure no errors

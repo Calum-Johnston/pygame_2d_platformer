@@ -14,8 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.game = game
         
         # Define the image size, color, etc
-        self.image = pygame.Surface([player_Width, player_Height])
-        self.image.fill(MAGNETA)
+        self.image = self.game.player_spritesheet.getImageAt(768, 768, 128, 256)
  
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
@@ -25,6 +24,11 @@ class Player(pygame.sprite.Sprite):
         self.position = vec(self.rect.midbottom)
         self.velocity = vec(0, 0)
         self.acceleration = vec(0, 0)
+
+        # Define variables to determine the action the player is currently taking
+        self.idle = True
+        self.walking = False
+        self.jumping = False
 
     def update(self):
         # Default acceleration is 0 (x-direction) and GRAVITY (y-direction)
@@ -52,13 +56,17 @@ class Player(pygame.sprite.Sprite):
         if(self.position.x < 0):
             self.position.x = WIDTH
 
-        #Check for collison (only if falling - prevents glitching to platforms)
-        if(self.velocity.y > 0):  # y velocity > 0 means we're moving downnward
+        #Check for collison (only if moving downward)
+        if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
             collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
             if(collision):
                 self.platform = collision[0]
-                self.position.y = self.platform.rect.top + 1
-                self.velocity.y = 0
+                for pt in collision:
+                    if(pt.rect.bottom > self.platform.rect.bottom):
+                        self.platform = pt
+                if(self.platform.rect.bottom > self.rect.bottom): 
+                    self.position.y = self.platform.rect.top + 1
+                    self.velocity.y = 0
 
         # Updates player position (keep track of bottom, since this is used in collisons)
         self.rect.midbottom = self.position
@@ -95,7 +103,6 @@ class Platform(pygame.sprite.Sprite):
         if(rd.randrange(0, PLATFORM_MOVING_CHANCE) == 0):
             self.movingX = True
  
-
     def update(self):
         # If platform moves horizontally, move it
         if(self.movingX):
@@ -104,6 +111,8 @@ class Platform(pygame.sprite.Sprite):
             if(self.rect.left <= 0):
                 self.movingX_Speed = 1
             self.rect.x += self.movingX_Speed
+
+
 
 ''' ENEMY SPRITE '''
 class Enemy(pygame.sprite.Sprite):

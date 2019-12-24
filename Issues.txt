@@ -1,6 +1,3 @@
-Player will move to top of platform on collision
-Player too big
-
 ERROR!!! Distance to nearest platform increases gradually over time with random code
 FIXED:
 - For inbuilt levels, distanceToNextBuild = distance between first new built plat (off-screen)
@@ -16,10 +13,20 @@ Issue here - To do with checking for collision and resetting y value
 Still to do:
 - Add enemy, that shoots missles at you (tracks you) - hit by enemy you die
 - Add ability to shoot back at missles
-- Add moving platforms
 - Add scoring to the game
-- Make platforms more difficult as score increases
+- Add boosts, etc
+- Make platforms more difficult as score increases (more moving, faster moving, greater distance, etc)
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)
 - Textures for players, platforms, enemies and more
 - Create proper start/end screens
-- General improvements to code, design, layout
+
+- General improvements to code, design, layout!!!
+- Make it so transform.scale is relative to size
+
+ISSUES:
+- Not sure why both distanceToNextBuild in buildRandomPlatforms() works
+- Not sure why self.position.y - 2 in update() works
+- if(self.platform.rect.bottom > self.rect.bottom):  PRODUCES error because
+  position is updated and then it is calculated
+
+

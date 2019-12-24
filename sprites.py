@@ -17,10 +17,10 @@ class Player(pygame.sprite.Sprite):
         self.loadImages()
 
         # Define variables to determine the action the player is currently taking
-        self.idle = True
+        self.idle = False
         self.walking = False
         self.jumping = False
-        self.direction = "R"
+        self.crouching = False
         self.currentImage = 0
         self.tickCount = 0
 
@@ -46,7 +46,10 @@ class Player(pygame.sprite.Sprite):
         # Default acceleration is 0 (x-direction) and GRAVITY (y-direction)
         self.acceleration = vec(0, PLAYER_GRAVITY)  # i.e. always accelerting downwards unless changed later
         
-        # Determine whether the player is accelerating
+        # Default crouching to False, so you only crouch when the key is pressed
+        self.crouching = False
+        
+        # Determine the key pressed
         keysPressed = pygame.key.get_pressed()
         if(keysPressed[pygame.K_RIGHT] or keysPressed[pygame.K_d]): 
             self.acceleration.x = PLAYER_ACCELERATION
@@ -54,6 +57,8 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x = -PLAYER_ACCELERATION
         if(keysPressed[pygame.K_SPACE]):
             self.jump()
+        if(keysPressed[pygame.K_DOWN] and self.jumping == False):
+            self.crouching = True
 
         # Decrease acceleration according friction, update velocity according to acceleration
         self.acceleration.x += self.velocity.x * PLAYER_FRICTION  # Friction only applies to x-range
@@ -119,11 +124,27 @@ class Player(pygame.sprite.Sprite):
 
     def animate(self):
         self.updateStates()
+        if(self.crouching):
+            if(self.tickCount > 15):
+                self.tickCount = 0
+                self.currentImage = (self.currentImage + 1) % len(self.crouching_frames)
+                self.image = self.crouching_frames[self.currentImage]
+                currentX, currentY = self.rect.midbottom
+                self.rect = self.image.get_rect()
+                self.rect.midbottom = (currentX, currentY)
         if(self.idle):
             if(self.tickCount > 30):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.idle_frames)
                 self.image = self.idle_frames[self.currentImage]
+                currentX, currentY = self.rect.midbottom
+                self.rect = self.image.get_rect()
+                self.rect.midbottom = (currentX, currentY)
+        elif(self.jumping):
+            if(self.tickCount > 15):
+                self.tickCount = 0
+                self.currentImage = (self.currentImage + 1) % len(self.jumping_frames)
+                self.image = self.jumping_frames[self.currentImage]
                 currentX, currentY = self.rect.midbottom
                 self.rect = self.image.get_rect()
                 self.rect.midbottom = (currentX, currentY)
@@ -133,14 +154,6 @@ class Player(pygame.sprite.Sprite):
                 self.currentImage = (self.currentImage + 1) % len(self.walking_frames_r)
                 if(self.velocity.x > 0): self.image = self.walking_frames_r[self.currentImage]
                 else: self.image = self.walking_frames_l[self.currentImage]
-                currentX, currentY = self.rect.midbottom
-                self.rect = self.image.get_rect()
-                self.rect.midbottom = (currentX, currentY)
-        elif(self.jumping):
-            if(self.tickCount > 15):
-                self.tickCount = 0
-                self.currentImage = (self.currentImage + 1) % len(self.jumping_frames)
-                self.image = self.jumping_frames[self.currentImage]
                 currentX, currentY = self.rect.midbottom
                 self.rect = self.image.get_rect()
                 self.rect.midbottom = (currentX, currentY)
@@ -173,6 +186,7 @@ class Player(pygame.sprite.Sprite):
         self.walking_frames_r = []
         self.walking_frames_l = []
         self.jumping_frames = []
+        self.crouching_frames = []
         
         # Update idle frame
         self.idle_frames.append(self.game.player_spritesheet.getImageAt(768, 0, 128, 256))
@@ -186,6 +200,9 @@ class Player(pygame.sprite.Sprite):
 
         # Update jumping frames
         self.jumping_frames.append(self.game.player_spritesheet.getImageAt(768, 256, 128, 256))
+
+        # Update crouching frames
+        self.crouching_frames.append(self.game.player_spritesheet.getImageAt(768, 1024, 128, 256))
     
 
 

@@ -31,6 +31,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.midbottom = (player_X, player_Y)
 
+        # Define the mask (for collision)
+        self.mask = pygame.mask.from_surface(self.image)
+
         # Define initial position, velocity, acceleration for player
         self.position = vec(self.rect.midbottom)
         self.velocity = vec(0, 0)
@@ -102,7 +105,7 @@ class Player(pygame.sprite.Sprite):
                     self.velocity.y = 0
     
         # Check for Mob Collision
-        collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False)
+        collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         if(collision):
             self.game.gameinstance = False
 
@@ -141,6 +144,7 @@ class Player(pygame.sprite.Sprite):
                 currentX, currentY = self.rect.midbottom
                 self.rect = self.image.get_rect()
                 self.rect.midbottom = (currentX, currentY)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def updateStates(self):
         # Update idle state
@@ -241,6 +245,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = enemy_X
         self.rect.y = enemy_Y
 
+        # Define the enemy mask
+        self.mask = pygame.mask.from_surface(self.image)
+
         # Define velocity varaible
         self.velocity = vec(1, 0)
 
@@ -263,8 +270,7 @@ class Enemy(pygame.sprite.Sprite):
             currentX, currentY = self.rect.midbottom
             self.rect = self.image.get_rect()
             self.rect.midbottom = (currentX, currentY)
-
-
+            self.mask = pygame.mask.from_surface(self.image)
 
     def loadImages(self):
         self.walking_frames_r = []

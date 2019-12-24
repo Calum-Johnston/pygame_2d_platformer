@@ -39,19 +39,35 @@ class Game:
     """ Constructor. Create all our attributes and initialize
         the game. """    
     def __init__(self):
+
+        # Read in spritesheet data
+        self.player_spritesheet = SpriteSheet(PLAYER_SPRITESHEET)
+        self.enemy_spritesheet = SpriteSheet(ENEMY_SPRITESHEET)
+        self.platform_spritesheet = SpriteSheet(PLATFORM_SPRITESHEET)
+
+        # Read in pre-built platform sections
+        easy = []; medium = []; hard = []
+        for x in range(0, 5):
+            with open("sections/easy/easy_%i.txt" % (x + 1)) as textFile:
+                easy.append([line.split() for line in textFile])
+            with open("sections/medium/medium_%i.txt" % (x + 1)) as textFile:
+                medium.append([line.split() for line in textFile])
+            with open("sections/hard/hard_%i.txt" % (x + 1)) as textFile:
+                hard.append([line.split() for line in textFile])
+
+
+    """ Setups basic game variables """
+    def setupGame(self):
         # Define the player's score
         self.score = 0
 
-        # Read in data files
-        self.loadData()
-
-        # Define groups
+        # Define sprite groups
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.object_sprites = pygame.sprite.Group()
 
-        # Define player
+        # Define player sprite
         self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)
         self.player_sprites.add(self.player)
 
@@ -68,18 +84,10 @@ class Game:
         # Create the camera
         self.camera = Camera(self)
 
-        # Run the game
-        self.run()
-
-    ''' Loads in any data required for the game '''
-    def loadData(self):
-        self.player_spritesheet = SpriteSheet(PLAYER_SPRITESHEET)
-        self.enemy_spritesheet = SpriteSheet(ENEMY_SPRITESHEET)
-        self.platform_spritesheet = SpriteSheet(PLATFORM_SPRITESHEET)
-
 
     """ Runs the game. Defines the main game loop. """ 
     def run(self):
+        self.setupGame()
         self.gameinstance = True
         while(self.gameinstance):
             self.events()
@@ -125,8 +133,26 @@ class Game:
         self.platform_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
         self.player_sprites.draw(screen)
+        if(not self.gameinstance):
+            self.gameOver()
         self.drawText("Score: " + str(self.score), 60, 20, 36, BLACK)
         pygame.display.flip()
+
+
+    """ Produces the game over screen """
+    def gameOver(self):
+        self.drawText("GAME OVER", WIDTH // 2, HEIGHT - 460, 46, BLACK)
+        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT - 420, 32, BLACK)
+        self.drawText("Press SPACE to return!", WIDTH / 2, HEIGHT - 40, 30, YELLOW)
+        pygame.display.flip()
+        keyPressed = False
+        while(not keyPressed):
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.KEYUP:
+                    if(event.key == pygame.K_SPACE):
+                        keyPressed = True
 
 
     """ Loads pre-built platforms into the game (just out of view)
@@ -185,16 +211,18 @@ class Game:
         screen.blit(text, text_rect)
 
 
+    """ Returns the score """
+    def getScore(self):
+        return self.score
 
-class splashScreen():
-    def __init__(self, typeScreen):
-        if typeScreen == "Start":
-            self.startSplash()
-        elif typeScreen == "End":
-            self.endSplash()
 
-    def startSplash(self):
-        self.drawStartSplash()
+class startScreen():
+    def __init__(self, highscore):
+        self.highscore = highscore
+        self.runSplashScreen()
+
+    def runSplashScreen(self):
+        self.drawSplashScreen()
         self.wait = True
         while(self.wait):
             for event in pygame.event.get():
@@ -205,31 +233,14 @@ class splashScreen():
                     self.wait = False
             clock.tick(FPS)
 
-    def drawStartSplash(self):
+    def drawSplashScreen(self):
         screen.fill(CYAN)
         self.drawText(TITLE, WIDTH / 2, HEIGHT / 4, 40, RED)
         self.drawText("LEFT/RIGHT = Arrow keys!", WIDTH / 2, HEIGHT / 8 * 3.5, 24, RED)
         self.drawText("JUMP = Space bar!", WIDTH / 2, HEIGHT / 2, 24, RED)
         self.drawText("Press any key to start!", WIDTH / 2, HEIGHT * 5 / 8, 30, RED)
+        self.drawText("CURRENT HIGHSCORE = " + str(self.highscore), WIDTH / 2, HEIGHT * 7 / 8, 26, BLACK)
         pygame.draw.rect(screen, RED, (30, 180, 220, 100), 1)
-        pygame.display.flip()
-
-    def endSplash(self):
-        self.drawEndSplash()
-        self.wait = True
-        while(self.wait):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.wait = False
-                    running = False
-                if event.type == pygame.KEYUP:
-                    self.wait = False
-            clock.tick(FPS)
-    
-    def drawEndSplash(self):
-        screen.fill(BLACK)
-        self.drawText("Game Over", WIDTH / 2, HEIGHT / 2, 36, WHITE)
-        self.drawText("Press any key to start again", WIDTH / 2, HEIGHT * 5 / 8, 24, WHITE)
         pygame.display.flip()
 
     def drawText(self, text, text_X, text_Y, text_Size, text_Colour):
@@ -239,12 +250,18 @@ class splashScreen():
         text_rect.center = (text_X, text_Y)
         screen.blit(text, text_rect)
 
+    
+
 
 
 # Main program
 running = True
+highscore = 0
+game = Game()
 while(running):
-    splashScreen("Start")
-    game = Game()
-    splashScreen("End")
+    startScreen(highscore)
+    game.run()
+    score = game.getScore()
+    if(score > highscore):
+        highscore = score
 

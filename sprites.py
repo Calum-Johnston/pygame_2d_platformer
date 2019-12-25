@@ -104,7 +104,7 @@ class Player(pygame.sprite.Sprite):
             self.game.gameinstance = False
 
         # Check for PROJECTILE Collision
-        collision = pygame.sprite.spritecollide(self, self.game.projectile_sprites, False)
+        collision = pygame.sprite.spritecollide(self, self.game.projectile_sprites, False, pygame.sprite.collide_mask)
         if(collision):
             self.game.gameinstance = False
 
@@ -297,7 +297,6 @@ class Enemy(pygame.sprite.Sprite):
         if(rd.randrange(0, 60) < 1):
             proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, BLACK)
             self.game.projectile_sprites.add(proj)
-            self.game.object_sprites.add(proj)
 
         # Enemy will bounce off the wall
         if(self.rect.right > WIDTH or self.rect.left < 0):
@@ -337,12 +336,12 @@ class Projectile(pygame.sprite.Sprite):
         super().__init__()   
 
         self.currentX = projectile_X
-        self.destX = playerX
+        self.destX = playerX 
         self.currentY = projectile_Y
-        self.destY = playerY
+        self.destY = playerY 
 
         self.speed = 1
-
+ 
         self.dx = self.destX - self.currentX
         self.dy = self.destY - self.currentY
 
@@ -352,7 +351,7 @@ class Projectile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (self.currentX, self.currentY)
 
-        #self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
     def update(self):

@@ -66,7 +66,6 @@ class Game:
         self.platform_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.projectile_sprites = pygame.sprite.Group()
-        self.object_sprites = pygame.sprite.Group()
 
         # Define player sprite
         self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)
@@ -78,12 +77,11 @@ class Game:
         self.distanceToNextBuild = HEIGHT
 
         # Define first enemy (test)
-        self.enemy = Enemy(WIDTH / 2, HEIGHT / 2, 40, 50, self)
+        self.enemy = Enemy(WIDTH / 2, -400, 40, 50, self)
         self.enemy_sprites.add(self.enemy)
-        self.object_sprites.add(self.enemy)
 
         # Create the camera
-        self.camera = Camera(self)
+        self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites, self.projectile_sprites)
 
 
     """ Runs the game. Defines the main game loop. """ 
@@ -114,8 +112,8 @@ class Game:
         self.platform_sprites.update()
         self.enemy_sprites.update()
         self.projectile_sprites.update()
-        print(len(self.object_sprites))
-        self.camera.update(self.player, self.object_sprites)
+        
+        self.camera.update()
 
         # If player falls out of the screen, end game
         if(self.player.rect.top > HEIGHT):
@@ -176,7 +174,6 @@ class Game:
                         if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self)
                         else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self)
                         self.platform_sprites.add(self.pt)
-                        self.object_sprites.add(self.pt)
 
         self.distanceToNextBuild = HEIGHT
     
@@ -198,7 +195,6 @@ class Game:
             y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 1))  # 60 is arbitrary, 130 is based on jump height
             pt = Platform(x, y, width, 20, self)
             self.platform_sprites.add(pt)
-            self.object_sprites.add(pt)
             if(x == 0):
                 firstPositionY = y
             closestPlatform_Distance = y # Reset y, and restart

@@ -65,6 +65,7 @@ class Game:
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
+        self.projectile_sprites = pygame.sprite.Group()
         self.object_sprites = pygame.sprite.Group()
 
         # Define player sprite
@@ -112,6 +113,8 @@ class Game:
         self.player_sprites.update()
         self.platform_sprites.update()
         self.enemy_sprites.update()
+        self.projectile_sprites.update()
+        print(len(self.object_sprites))
         self.camera.update(self.player, self.object_sprites)
 
         # If player falls out of the screen, end game
@@ -132,6 +135,7 @@ class Game:
         screen.fill(CYAN)
         self.platform_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
+        self.projectile_sprites.draw(screen)
         self.player_sprites.draw(screen)
         if(not self.gameinstance):
             self.gameOver()

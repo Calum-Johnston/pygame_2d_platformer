@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 import random as rd
+from math import hypot
 vec = pygame.math.Vector2
 
 ''' PLAYER SPRITE '''
@@ -99,6 +100,11 @@ class Player(pygame.sprite.Sprite):
     
         # Check for ENEMY Collision
         collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
+        if(collision):
+            self.game.gameinstance = False
+
+        # Check for PROJECTILE Collision
+        collision = pygame.sprite.spritecollide(self, self.game.projectile_sprites, False)
         if(collision):
             self.game.gameinstance = False
 
@@ -284,7 +290,15 @@ class Enemy(pygame.sprite.Sprite):
         self.game = game
 
     def update(self):
+        # Animate the enemy
         self.animate()
+
+        # Produce projectile
+        if(rd.randrange(0, 60) < 1):
+            proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, BLACK)
+            self.game.projectile_sprites.add(proj)
+            self.game.object_sprites.add(proj)
+
         # Enemy will bounce off the wall
         if(self.rect.right > WIDTH or self.rect.left < 0):
             self.velocity.x = -self.velocity.x
@@ -313,3 +327,44 @@ class Enemy(pygame.sprite.Sprite):
         self.walking_frames_r.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), (scaleWidth, scaleHeight)))
         self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False), (scaleWidth, scaleHeight)))
         self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False), (scaleWidth, scaleHeight)))
+
+
+
+''' PROJECTILE CLASS '''
+class Projectile(pygame.sprite.Sprite):
+    #https://stackoverflow.com/questions/31148730/making-a-bullet-move-to-your-cursor-using-pygame
+    def __init__(self, projectile_X, projectile_Y, playerX, playerY, colour):
+        super().__init__()   
+
+        self.currentX = projectile_X
+        self.destX = playerX
+        self.currentY = projectile_Y
+        self.destY = playerY
+
+        self.speed = 1
+
+        self.dx = self.destX - self.currentX
+        self.dy = self.destY - self.currentY
+
+        self.image = pygame.Surface([10, 10])
+        self.image.fill(RED)
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.currentX, self.currentY)
+
+        #self.mask = pygame.mask.from_surface(self.image)
+
+
+    def update(self):
+        if(self.currentX < 0 or self.currentX > WIDTH and self.currentY < 0 or self.currentY > HEIGHT):
+            self.kill()
+
+        self.dist = max(1, hypot(self.dx, self.dy))
+
+        self.vx = self.speed * (self.dx / self.dist)
+        self.vy = self.speed * (self.dy / self.dist)
+
+        self.currentX += self.vx
+        self.currentY += self.vy
+
+        self.rect.center = (self.currentX, self.currentY)

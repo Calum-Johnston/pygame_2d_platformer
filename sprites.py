@@ -221,10 +221,11 @@ class Player(pygame.sprite.Sprite):
     
 
 
+
 ''' PLATFORM SPRITE '''
 class Platform(pygame.sprite.Sprite):
 
-    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, game):
+    def __init__(self, plat_X, plat_Y, plat_Width, plat_Height, place_flag, game):
         super().__init__()
 
         # Set the game instance
@@ -232,6 +233,9 @@ class Platform(pygame.sprite.Sprite):
 
         # Load in potential platforms
         self.loadImages()
+
+        # Do we place a flag
+        self.place_flag = place_flag
 
         # Determine image
         self.image = pygame.transform.scale(self.platform_frames[0], (plat_Width, plat_Height))
@@ -246,16 +250,19 @@ class Platform(pygame.sprite.Sprite):
         self.initialise_Randomness()
 
     def initialise_Randomness(self):
-        # Is the platform going to be moving?
-        self.movingX = False
-        self.movingX_Speed = PLATFORM_MOVING_SPEED
-        if(rd.randrange(0, PLATFORM_MOVING_CHANCE) == 0):
-            self.movingX = True
 
-        # Is the platform going to have
-        if(rd.randrange(0, 50) < 1 and self.movingX == False):
-            flag = Flag(self.rect.centerx, self.rect.top, self.game)
+        # Is the platform going to have a flag?
+        if(self.place_flag):
+            flag = Flag(rd.randrange(self.rect.left, self.rect.right), self.rect.top, self.game)
             self.game.item_sprites.add(flag)
+
+        # Is the platform going to be moving (only if it has no flag?
+        self.movingX = False
+        if(not self.place_flag):
+            self.movingX_Speed = rd.choice(self.game.platform_movement_speed)
+            if(rd.randrange(0, self.game.platform_movement_chance) == 0):
+                self.movingX = True
+
 
     def update(self):
         # If platform moves horizontally, move it
@@ -299,24 +306,28 @@ class Enemy(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
         # Define velocity varaible
-        self.velocity = vec(1, 0)
+        self.velocity = vec(ENEMY_MOVING_SPEED, 0)
 
     def update(self):
-        # Animate the enemy
-        self.animate()
 
-        # Produce projectile
-        if(rd.randrange(0, 1000) < 1):
-            proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self.game)
-            self.game.projectile_sprites.add(proj)
+        # If on the screen
+        if(self.rect.bottom >= 0 and self.rect.top <= HEIGHT):
 
-        # Enemy will bounce off the wall
-        if(self.rect.right > WIDTH or self.rect.left < 0):
-            self.velocity.x = -self.velocity.x
-        self.rect.x += self.velocity.x
+            # Animate the enemy
+            self.animate()
 
-        # Update tickcount 
-        self.tickCount += 1
+            # Enemy will bounce off the wall
+            if(self.rect.right > WIDTH or self.rect.left < 0):
+                self.velocity.x = -self.velocity.x
+            self.rect.x += self.velocity.x
+
+            # Produce projectile
+            if(rd.randrange(0, 1000) < 1):
+                proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self.game)
+                self.game.projectile_sprites.add(proj)
+
+            # Update tickcount and speedtick
+            self.tickCount += 1
 
     def animate(self):
         if(self.tickCount > 15):
@@ -341,6 +352,7 @@ class Enemy(pygame.sprite.Sprite):
         self.walking_frames_l.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), (scaleWidth, scaleHeight)))
         self.walking_frames_r.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False), (scaleWidth, scaleHeight)))
         self.walking_frames_r.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False), (scaleWidth, scaleHeight)))
+
 
 
 
@@ -394,6 +406,7 @@ class Projectile(pygame.sprite.Sprite):
 
 
 
+
 ''' FLAG CLASS '''
 class Flag(pygame.sprite.Sprite):
 
@@ -415,7 +428,8 @@ class Flag(pygame.sprite.Sprite):
  
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-        self.rect.midbottom = (flag_X, flag_Y)
+        self.rect.left = flag_X - 2
+        self.rect.bottom = flag_Y
 
         # Define the enemy mask
         self.mask = pygame.mask.from_surface(self.image)

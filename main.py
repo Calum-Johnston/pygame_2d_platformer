@@ -60,8 +60,21 @@ class Game:
     """ Setups basic game variables """
     def setupGame(self):
         # Define the player's score
+        self.scoreToNextDiff = 5
         self.score = 0
+
+        # Flag related variables
         self.flags_captured = 0
+        self.place_flag = False
+
+
+        # Define DIFFICULTY SETTINGS
+        self.difficulty = 0
+        self.difficulty_platform_dist = 0
+        self.platform_movement_speed = [PLATFORM_MOVING_SPEED]
+        self.platform_movement_chance = PLATFORM_MOVING_CHANCE
+        self.enemy_spawn_chance = ENEMY_SPAWN_CHANCE
+        self.enemy_moving_speed = ENEMY_MOVING_SPEED
 
         # Define sprite groups
         self.player_sprites = pygame.sprite.Group()
@@ -78,10 +91,6 @@ class Game:
         self.loadNewPlatforms(True)
         self.loadNewPlatforms(False)
         self.distanceToNextBuild = HEIGHT
-
-        # Define first enemy (test)
-        self.enemy = Enemy(WIDTH / 2, -400, 40, 50, self)
-        self.enemy_sprites.add(self.enemy)
 
         # Create the camera
         self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites, self.projectile_sprites, self.item_sprites)
@@ -107,30 +116,50 @@ class Game:
                 self.gameinstance = False
 
 
-    """ This method is run each time through the frame. It
-        updates positions and checks for collisions. """
+    """ Updates game objects (animations, position, etc) """
     def update(self):
         # Update player sprite and then camera
+        self.sprite_Update()
+        self.camera_Update()
+        self.difficulty_Update()
+    
+    """ Update sprites in the game """
+    def sprite_Update(self):
         self.player_sprites.update()
         self.platform_sprites.update()
         self.enemy_sprites.update()
         self.projectile_sprites.update()
         self.item_sprites.update()
-        
+
+    """ Updates camera & builds new platforms """
+    def camera_Update(self):
         self.camera.update()
 
+        # Generate next part of level (both randomly & prebuilt)
+        if self.camera.distanceMoved > self.distanceToNextBuild:
+            self.buildRandomPlatforms()
+            self.camera.distanceMoved = 0
+
+    """ Updates game variables, difficulty, enemies and more """
+    def difficulty_Update(self):
         # If player falls out of the screen, end game
         if(self.player.rect.top > HEIGHT):
             self.gameinstance = False
 
-        # Generate next part of level (both randomly & prebuilt)
-        if self.camera.distanceMoved > self.distanceToNextBuild:
-            if(rd.randrange(0, 20) < 1):
-                self.loadNewPlatforms(False)
-            else:
-                self.buildRandomPlatforms()
-            self.camera.distanceMoved = 0
+        if(self.scoreToNextDiff == 0):
+            self.scoreToNextDiff = 5
+            if(len(self.platform_movement_speed) < 3):
+                self.platform_movement_speed.append(self.platform_movement_speed[len(self.platform_movement_speed) - 1] + 1)
+            if(self.platform_movement_chance > 5):
+                self.platform_movement_chance -= 1
+            if(self.difficulty_platform_dist < 60):
+                self.difficulty_platform_dist += 10
+            if(self.enemy_spawn_chance > 500):
+                self.enemy_spawn_chance -= 100
 
+            # Put a new flag down!
+            self.place_flag = True
+            
 
     """ Display everything to the screen for the game. """
     def draw(self):
@@ -165,10 +194,18 @@ class Game:
 
 
     """ Loads pre-built platforms into the game (just out of view)
-        based on textfiles read in previously. """
+        based on textfiles read in previously. 
+        CURRENTLY NOT IN USE"""  
     def loadNewPlatforms(self, newGame):
-        if(newGame): new_Section = easy[0]
-        else: new_Section = easy[0] # rd.randrange(0, 5)
+        if(newGame): 
+            new_Section = easy[0]
+        else: 
+            if(self.difficulty == 0):
+                new_Section = easy[rd.randrange(1, len(easy))]
+            elif(self.difficulty == 1):
+                new_Section = medium[rd.randrange(0, len(medium))]
+            elif(self.difficulty == 2):
+                new_Section = hard[rd.randrange(0, len(hard))]
 
         start_X = 0; start_Y = 0; width_pt = 0
         for y in range(0, len(new_Section) - 1) :
@@ -178,8 +215,8 @@ class Game:
                         start_X  = x * 20 - 20; start_Y = y * 20 - 20
                     if(new_Section[y][0][x] == "x" and new_Section[y][0][x + 1] != "x"):
                         width_pt = (x * 20) - start_X
-                        if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self)
-                        else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self)
+                        if(newGame): self.pt = Platform(start_X, start_Y, width_pt, 20, self.place_flag, self)
+                        else: self.pt = Platform(start_X, start_Y - HEIGHT, width_pt, 20, self.place_flag, self)
                         self.platform_sprites.add(self.pt)
 
         self.distanceToNextBuild = HEIGHT
@@ -187,7 +224,6 @@ class Game:
     
     """ Bulids random platforms to cushion prebuilt platforms - gives
         the appearance of entirely randomised level. """
-    # ONLY FUNCTION I WANT TO IMPROVE
     def buildRandomPlatforms(self):
         # Get closest platform
         closestPlatform_Distance = 1000
@@ -199,12 +235,18 @@ class Game:
         for x in range(0, 6):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
-            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - 60, 1))  # 60 is arbitrary, 130 is based on jump height
-            pt = Platform(x, y, width, 20, self)
+            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - self.difficulty_platform_dist - 60, 1)) 
+            
+            if(self.place_flag):
+                pt = Platform(x, y, width, 20, self.place_flag, self)
+                self.place_flag = False
+            else:
+                pt = Platform(x, y, width, 20, self.place_flag, self)
             self.platform_sprites.add(pt)
+
             if(x == 0):
                 firstPositionY = y
-            closestPlatform_Distance = y # Reset y, and restart
+            closestPlatform_Distance = y
         
         self.distanceToNextBuild = abs(firstPositionY - closestPlatform_Distance)
 
@@ -271,4 +313,3 @@ while(running):
     score = game.getScore()
     if(score > highscore):
         highscore = score
-

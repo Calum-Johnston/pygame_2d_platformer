@@ -1,7 +1,7 @@
 Still to do:
-- Flag spawn (once every 100)
-- Add platform you cannot jump through (only for challenge sections)
-- Add sound
+- Mess around with game settings
+- General improvements to code, design, layout!!!
+
 
 
 MAKE TICK COUNT A THING IN PLAYER
@@ -14,7 +14,7 @@ Could do, but don't have to:
 - Make it so it works for any size screen
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)
 - Add platform you cannot jump through (only for challenge sections)
-- General improvements to code, design, layout!!!
+- Add sound
 
 
 Not issues but interesting:

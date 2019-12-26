@@ -60,7 +60,7 @@ class Game:
     """ Setups basic game variables """
     def setupGame(self):
         # Define the player's score
-        self.scoreToNextDiff = 5
+        self.scoreToNextDiff = 50
         self.score = 0
 
         # Flag related variables
@@ -70,7 +70,7 @@ class Game:
 
         # Define DIFFICULTY SETTINGS
         self.difficulty = 0
-        self.difficulty_platform_dist = 0
+        self.difficulty_platform_dist = 40
         self.platform_movement_speed = [PLATFORM_MOVING_SPEED]
         self.platform_movement_chance = PLATFORM_MOVING_CHANCE
         self.enemy_spawn_chance = ENEMY_SPAWN_CHANCE
@@ -147,12 +147,12 @@ class Game:
             self.gameinstance = False
 
         if(self.scoreToNextDiff == 0):
-            self.scoreToNextDiff = 5
+            self.scoreToNextDiff = 50
             if(len(self.platform_movement_speed) < 3):
                 self.platform_movement_speed.append(self.platform_movement_speed[len(self.platform_movement_speed) - 1] + 1)
             if(self.platform_movement_chance > 5):
                 self.platform_movement_chance -= 1
-            if(self.difficulty_platform_dist < 60):
+            if(self.difficulty_platform_dist < 120):
                 self.difficulty_platform_dist += 10
             if(self.enemy_spawn_chance > 500):
                 self.enemy_spawn_chance -= 100
@@ -179,8 +179,8 @@ class Game:
     """ Produces the game over screen """
     def gameOver(self):
         self.drawText("GAME OVER", WIDTH // 2, HEIGHT // 16 * 1, 46, BLACK)
-        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT // 16 * 2, 32, BLACK)
-        self.drawText("Flags captured: " + str(self.flags_captured), WIDTH // 2, HEIGHT // 16 * 3, 32, BLACK)
+        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT // 16 * 2, 32, MAGNETA)
+        self.drawText("Flags captured: " + str(self.flags_captured), WIDTH // 2, HEIGHT // 16 * 3, 32, MAGNETA)
         self.drawText("Press ESC to return!", WIDTH / 2, HEIGHT - 40, 30, YELLOW)
         pygame.display.flip()
         keyPressed = False
@@ -235,7 +235,7 @@ class Game:
         for x in range(0, 6):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
-            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - self.difficulty_platform_dist - 60, 1)) 
+            y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - self.difficulty_platform_dist, 1)) 
             
             if(self.place_flag):
                 pt = Platform(x, y, width, 20, self.place_flag, self)

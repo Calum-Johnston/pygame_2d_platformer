@@ -322,7 +322,7 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.x += self.velocity.x
 
             # Produce projectile
-            if(rd.randrange(0, 1000) < 1):
+            if(rd.randrange(0, ENEMY_SHOOT_CHANCE) < 1):
                 proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self.game)
                 self.game.projectile_sprites.add(proj)
 

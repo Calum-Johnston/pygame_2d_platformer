@@ -44,6 +44,7 @@ class Game:
         self.player_spritesheet = SpriteSheet(PLAYER_SPRITESHEET)
         self.enemy_spritesheet = SpriteSheet(ENEMY_SPRITESHEET)
         self.platform_spritesheet = SpriteSheet(PLATFORM_SPRITESHEET)
+        self.items_spritesheet = SpriteSheet(ITEM_SPRITESHEET)
 
         # Read in pre-built platform sections
         easy = []; medium = []; hard = []
@@ -60,12 +61,14 @@ class Game:
     def setupGame(self):
         # Define the player's score
         self.score = 0
+        self.flags_captured = 0
 
         # Define sprite groups
         self.player_sprites = pygame.sprite.Group()
         self.platform_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.projectile_sprites = pygame.sprite.Group()
+        self.item_sprites = pygame.sprite.Group()
 
         # Define player sprite
         self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)
@@ -81,7 +84,7 @@ class Game:
         self.enemy_sprites.add(self.enemy)
 
         # Create the camera
-        self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites, self.projectile_sprites)
+        self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites, self.projectile_sprites, self.item_sprites)
 
 
     """ Runs the game. Defines the main game loop. """ 
@@ -112,6 +115,7 @@ class Game:
         self.platform_sprites.update()
         self.enemy_sprites.update()
         self.projectile_sprites.update()
+        self.item_sprites.update()
         
         self.camera.update()
 
@@ -132,6 +136,7 @@ class Game:
     def draw(self):
         screen.fill(CYAN)
         self.platform_sprites.draw(screen)
+        self.item_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
         self.projectile_sprites.draw(screen)
         self.player_sprites.draw(screen)

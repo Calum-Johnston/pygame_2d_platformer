@@ -108,6 +108,13 @@ class Player(pygame.sprite.Sprite):
         if(collision):
             self.game.gameinstance = False
 
+        # Check for Flag Collision
+        collision = pygame.sprite.spritecollide(self, self.game.item_sprites, False, pygame.sprite.collide_mask)
+        if(collision):
+            flag = collision[0]
+            flag.update_Captured()
+            self.game.flags_captured += 1
+
     def jump(self):
         self.rect.y += 1
         collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
@@ -235,12 +242,20 @@ class Platform(pygame.sprite.Sprite):
         # Define the mask (for collision)
         self.mask = pygame.mask.from_surface(self.image)
 
+        self.initialise_Randomness()
+
+    def initialise_Randomness(self):
         # Is the platform going to be moving?
         self.movingX = False
         self.movingX_Speed = PLATFORM_MOVING_SPEED
         if(rd.randrange(0, PLATFORM_MOVING_CHANCE) == 0):
             self.movingX = True
- 
+
+        # Is the platform going to have
+        if(rd.randrange(0, 50) < 1 and self.movingX == False):
+            flag = Flag(self.rect.centerx, self.rect.top, self.game)
+            self.game.item_sprites.add(flag)
+
     def update(self):
         # If platform moves horizontally, move it
         if(self.movingX):
@@ -250,8 +265,7 @@ class Platform(pygame.sprite.Sprite):
 
     def loadImages(self):
         self.platform_frames = []
-        self.platform_frames.append(self.game.platform_spritesheet.getImageAt(128, 128, 128, 128)) #Full
-        #self.platform_frames.append(self.game.platform_spritesheet.getImageAt(0, 1024, 128, 128)) #Full
+        self.platform_frames.append(self.game.platform_spritesheet.getImageAt(128, 128, 128, 128))
 
 
 
@@ -286,9 +300,6 @@ class Enemy(pygame.sprite.Sprite):
         # Define velocity varaible
         self.velocity = vec(1, 0)
 
-        # Define player (for use in scrolling the screen)
-        self.game = game
-
     def update(self):
         # Animate the enemy
         self.animate()
@@ -302,6 +313,9 @@ class Enemy(pygame.sprite.Sprite):
         if(self.rect.right > WIDTH or self.rect.left < 0):
             self.velocity.x = -self.velocity.x
         self.rect.x += self.velocity.x
+
+        # Update tickcount 
+        self.tickCount += 1
 
     def animate(self):
         if(self.tickCount > 15):
@@ -322,15 +336,16 @@ class Enemy(pygame.sprite.Sprite):
         scaleHeight = HEIGHT // 8
 
         # Update walking frames
-        self.walking_frames_r.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), (scaleWidth, scaleHeight)))
-        self.walking_frames_r.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), (scaleWidth, scaleHeight)))
-        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False), (scaleWidth, scaleHeight)))
-        self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), (scaleWidth, scaleHeight)))
+        self.walking_frames_l.append(pygame.transform.scale(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), (scaleWidth, scaleHeight)))
+        self.walking_frames_r.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 910, 128, 128), True, False), (scaleWidth, scaleHeight)))
+        self.walking_frames_r.append(pygame.transform.scale(pygame.transform.flip(self.game.enemy_spritesheet.getImageAt(390, 650, 128, 128), True, False), (scaleWidth, scaleHeight)))
 
 
 
 ''' PROJECTILE CLASS '''
 class Projectile(pygame.sprite.Sprite):
+
     #https://stackoverflow.com/questions/31148730/making-a-bullet-move-to-your-cursor-using-pygame
     def __init__(self, projectile_X, projectile_Y, playerX, playerY, colour):
         super().__init__()   
@@ -367,3 +382,92 @@ class Projectile(pygame.sprite.Sprite):
         self.currentY += self.vy
 
         self.rect.center = (self.currentX, self.currentY)
+
+
+
+''' FLAG CLASS '''
+class Flag(pygame.sprite.Sprite):
+
+    def __init__(self, flag_X, flag_Y, game):
+        super().__init__()
+
+        # Get the game instance (for collision use)
+        self.game = game
+
+        # Load in the sprites images
+        self.loadImages()
+
+        # Define variables to determine the action the player is currently taking
+        self.currentImage = 0
+        self.tickCount = 0
+
+        # Define the image size, color, etc
+        self.image = self.moving_frames[0]
+ 
+        # Fetch the rectangle object that has the dimensions of the image.
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (flag_X, flag_Y)
+
+        # Define the enemy mask
+        self.mask = pygame.mask.from_surface(self.image)
+
+        # Define captured variable
+        self.captured = False
+
+    def update(self):
+        # Animate the enemy
+        self.animate()
+        # Update tick count
+        self.tickCount += 1
+
+    def animate(self):
+        if(self.tickCount > 15 and self.captured == False):
+            self.tickCount = 0
+            self.currentImage = (self.currentImage + 1) % len(self.moving_frames)
+            self.image = self.moving_frames[self.currentImage]
+
+            currentX, currentY = self.rect.midbottom
+            self.rect = self.image.get_rect()
+            self.rect.midbottom = (currentX, currentY)
+            self.mask = pygame.mask.from_surface(self.image)
+
+    def update_Captured(self):
+        self.captured = True
+        self.image = self.captured_frames[0]
+        currentX, currentY = self.rect.midbottom
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (currentX, currentY)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def loadImages(self):
+        self.moving_frames = []
+        self.captured_frames = []
+
+        number = rd.randrange(0, 4)
+
+        scaleWidth = WIDTH // 6
+        scaleHeight = HEIGHT // 6
+
+        # Blue flag
+        if(number == 0):
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(256, 0, 128, 128), (scaleWidth, scaleHeight)))
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(128, 384, 128, 128), (scaleWidth, scaleHeight)))
+            self.captured_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(256, 128, 128, 128), (scaleWidth, scaleHeight)))
+        # Green flag
+        elif(number == 1):
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(128, 128, 128, 128), (scaleWidth, scaleHeight)))
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(128, 0, 128, 128), (scaleWidth, scaleHeight)))
+            self.captured_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(128, 256, 128, 128), (scaleWidth, scaleHeight)))
+        # Red flag
+        elif(number == 2):
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(0, 256, 128, 128), (scaleWidth, scaleHeight)))
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(0, 128, 128, 128), (scaleWidth, scaleHeight)))
+            self.captured_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(0, 384, 128, 128), (scaleWidth, scaleHeight)))
+        # Yellow flag
+        else:
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(256, 384, 128, 128), (scaleWidth, scaleHeight)))
+            self.moving_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(640, 256, 128, 128), (scaleWidth, scaleHeight)))
+            self.captured_frames.append(pygame.transform.scale(self.game.items_spritesheet.getImageAt(0, 0, 128, 128), (scaleWidth, scaleHeight)))
+
+
+        

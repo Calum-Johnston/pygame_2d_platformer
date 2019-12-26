@@ -28,3 +28,6 @@ ISSUES:
 - Scaling issue when reading in images
 
 
+MAKE TICK COUNT A THING IN PLAYER
+
+

@@ -4,13 +4,14 @@ from settings import *
 ''' CAMERA  '''
 class Camera():
 
-    def __init__(self, game, player, platforms, enemies, projectiles):
+    def __init__(self, game, player, platforms, enemies, projectiles, items):
         self.distanceMoved = 0
         self.game = game
         self.player = player
         self.platforms = platforms
         self.enemies = enemies
         self.projectiles = projectiles
+        self.items = items
 
     def update(self):
         # Move camera upward if player is moving update
@@ -38,6 +39,10 @@ class Camera():
             # Update projectiles
             for proj in self.projectiles:
                 proj.currentY += abs(self.player.velocity.y)
+
+            # Update items
+            for item in self.items:
+                item.rect.y += abs(self.player.velocity.y)
 
 
 ''' SPRITESHEET '''

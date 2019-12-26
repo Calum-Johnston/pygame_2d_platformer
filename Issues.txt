@@ -1,33 +1,26 @@
-ERROR!!! Distance to nearest platform increases gradually over time with random code
-FIXED:
-- For inbuilt levels, distanceToNextBuild = distance between first new built plat (off-screen)
-  and final new built plat (off-screen)
-- For randomised levels, distanceToNextBuild = distance between highest plat (on-screen) and
-  final new built plat (off-screen)
-Because of this, the camera would have to move a little further each time before generating
-new platforms, and eventually it wouldn't generate them within range.
-
-Possbily implement equation to calculate max jump height (for platform gen.)
-Issue here - To do with checking for collision and resetting y value
-
 Still to do:
-- Add boosts, etc
+- Improve tick count (for animations)
+- Collisions between player and projectiles
 - Make platforms more difficult as score increases (more moving, faster moving, greater distance, etc)
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)
-- Create proper start/end screens
 
+
+MAKE TICK COUNT A THING IN PLAYER
+
+Could do, but don't have to:
+- Add special abilities
+- Improve moving off the screen
+- Implement equation to calculate max jump height (for platform gen.) (Issue here - To do with checking for collision and resetting y value)
+- Make scaling automatic (for loading in images)
+- Make it so it works for any size screen
 - General improvements to code, design, layout!!!
-- Make it so transform.scale is relative to size (in spritesheet class)
-- Could change moving off the screen
 
-ISSUES:
+
+Not issues but interesting:
 - Not sure why both distanceToNextBuild in buildRandomPlatforms() works
 - Not sure why self.position.y - 2 in update() works
 - if(self.platform.rect.bottom > self.rect.bottom):  PRODUCES error because
   position is updated and then it is calculated
-- Scaling issue when reading in images
 
-
-MAKE TICK COUNT A THING IN PLAYER
 
 

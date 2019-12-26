@@ -3,7 +3,6 @@ TITLE = "University Project"
 WIDTH = 280
 HEIGHT = 500
 FPS = 60
-MAX_PLATFORMS_WITHIN_JUMP = 3
 MAX_DISTANCE_UP = 130
 
 # Player settings

@@ -112,8 +112,9 @@ class Player(pygame.sprite.Sprite):
         collision = pygame.sprite.spritecollide(self, self.game.item_sprites, False, pygame.sprite.collide_mask)
         if(collision):
             flag = collision[0]
-            flag.update_Captured()
-            self.game.flags_captured += 1
+            if(flag.captured == False):
+                flag.update_Captured()
+                self.game.flags_captured += 1
 
     def jump(self):
         self.rect.y += 1
@@ -305,8 +306,8 @@ class Enemy(pygame.sprite.Sprite):
         self.animate()
 
         # Produce projectile
-        if(rd.randrange(0, 60) < 1):
-            proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, BLACK)
+        if(rd.randrange(0, 1000) < 1):
+            proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self.game)
             self.game.projectile_sprites.add(proj)
 
         # Enemy will bounce off the wall
@@ -347,8 +348,12 @@ class Enemy(pygame.sprite.Sprite):
 class Projectile(pygame.sprite.Sprite):
 
     #https://stackoverflow.com/questions/31148730/making-a-bullet-move-to-your-cursor-using-pygame
-    def __init__(self, projectile_X, projectile_Y, playerX, playerY, colour):
+    def __init__(self, projectile_X, projectile_Y, playerX, playerY, game):
         super().__init__()   
+
+        self.game = game
+
+        self.loadImages()
 
         self.currentX = projectile_X
         self.destX = playerX 
@@ -360,8 +365,7 @@ class Projectile(pygame.sprite.Sprite):
         self.dx = self.destX - self.currentX
         self.dy = self.destY - self.currentY
 
-        self.image = pygame.Surface([10, 10])
-        self.image.fill(RED)
+        self.image = self.projectileImage
 
         self.rect = self.image.get_rect()
         self.rect.center = (self.currentX, self.currentY)
@@ -382,6 +386,11 @@ class Projectile(pygame.sprite.Sprite):
         self.currentY += self.vy
 
         self.rect.center = (self.currentX, self.currentY)
+
+    def loadImages(self):
+        scaleWidth = WIDTH // 12
+        scaleHeight = HEIGHT // 24
+        self.projectileImage = pygame.transform.scale(self.game.items_spritesheet.getImageAt(384, 0, 128, 128), (scaleWidth, scaleHeight))
 
 
 

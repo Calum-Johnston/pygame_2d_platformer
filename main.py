@@ -142,15 +142,17 @@ class Game:
         self.player_sprites.draw(screen)
         if(not self.gameinstance):
             self.gameOver()
-        self.drawText("Score: " + str(self.score), 60, 20, 36, BLACK)
+        self.drawText("Score: " + str(self.score), 60, HEIGHT - 20, 36, BLACK)
+        self.drawText("Treasures: " + str(self.flags_captured), WIDTH - 80,  HEIGHT - 20, 36, BLACK)
         pygame.display.flip()
 
 
     """ Produces the game over screen """
     def gameOver(self):
-        self.drawText("GAME OVER", WIDTH // 2, HEIGHT - 460, 46, BLACK)
-        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT - 420, 32, BLACK)
-        self.drawText("Press SPACE to return!", WIDTH / 2, HEIGHT - 40, 30, YELLOW)
+        self.drawText("GAME OVER", WIDTH // 2, HEIGHT // 16 * 1, 46, BLACK)
+        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT // 16 * 2, 32, BLACK)
+        self.drawText("Flags captured: " + str(self.flags_captured), WIDTH // 2, HEIGHT // 16 * 3, 32, BLACK)
+        self.drawText("Press ESC to return!", WIDTH / 2, HEIGHT - 40, 30, YELLOW)
         pygame.display.flip()
         keyPressed = False
         while(not keyPressed):
@@ -158,7 +160,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.KEYUP:
-                    if(event.key == pygame.K_SPACE):
+                    if(event.key == pygame.K_ESCAPE):
                         keyPressed = True
 
 

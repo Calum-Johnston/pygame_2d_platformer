@@ -1,6 +1,6 @@
 Still to do:
-- Improve tick count (for animations)
 - Collisions between player and projectiles
+- Change enemy spawn, flag spawn, platform spawn, etc
 - Make platforms more difficult as score increases (more moving, faster moving, greater distance, etc)
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)
 

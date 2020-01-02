@@ -150,7 +150,7 @@ class Game:
             self.scoreToNextDiff = 50
             if(len(self.platform_movement_speed) < 3):
                 self.platform_movement_speed.append(self.platform_movement_speed[len(self.platform_movement_speed) - 1] + 1)
-            if(self.platform_movement_chance > 1):
+            if(self.platform_movement_chance > 2):
                 self.platform_movement_chance -= 2
             if(self.difficulty_platform_dist < 120):
                 self.difficulty_platform_dist += 10

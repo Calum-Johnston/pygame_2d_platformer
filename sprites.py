@@ -79,6 +79,7 @@ class Player(pygame.sprite.Sprite):
         # Updates player position (keep track of bottom, since this is used in collisons)
         self.rect.midbottom = self.position
 
+        # Once movement complete, check for collisions and animate
         self.checkCollisions()
         self.animate()
 
@@ -111,10 +112,15 @@ class Player(pygame.sprite.Sprite):
         # Check for Flag Collision
         collision = pygame.sprite.spritecollide(self, self.game.item_sprites, False, pygame.sprite.collide_mask)
         if(collision):
-            flag = collision[0]
-            if(flag.captured == False):
-                flag.update_Captured()
-                self.game.flags_captured += 1
+            for item in collision:
+                if(item.type == "flag"):
+                    if(item.captured == False):
+                        item.update_Captured()
+                        self.game.flags_captured += 1
+                elif(item.type == "boost"):
+                    if(item.used == False):
+                        self.velocity.y = -50
+
 
     def jump(self):
         self.rect.y += 1
@@ -193,7 +199,6 @@ class Player(pygame.sprite.Sprite):
                     self.jumping = True
         
     def loadImages(self):
-
         self.idle_frames = []
         self.walking_frames_r = []
         self.walking_frames_l = []
@@ -263,6 +268,10 @@ class Platform(pygame.sprite.Sprite):
             if(rd.randrange(0, self.game.platform_movement_chance) == 0):
                 self.movingX = True
 
+        if(not self.place_flag):
+            if(rd.randrange(0, 10) == 0):
+                upgrade = Upgrade(rd.randrange(self.rect.left, self.rect.right), self.rect.top, "boost", self.game)
+                self.game.item_sprites.add(upgrade)
 
     def update(self):
         # If platform moves horizontally, move it
@@ -384,7 +393,6 @@ class Projectile(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(self.image)
 
-
     def update(self):
         if(self.currentX < 0 or self.currentX > WIDTH and self.currentY < 0 or self.currentY > HEIGHT):
             self.kill()
@@ -418,6 +426,9 @@ class Flag(pygame.sprite.Sprite):
 
         # Load in the sprites images
         self.loadImages()
+
+        # Define the type of item it is
+        self.type = "flag"
 
         # Define variables to determine the action the player is currently taking
         self.currentImage = 0
@@ -494,3 +505,48 @@ class Flag(pygame.sprite.Sprite):
 
 
         
+''' UPGRADE CLASS '''
+class Upgrade(pygame.sprite.Sprite):
+
+    def __init__(self, upgrade_X, upgrade_Y, upgrade_Type, game):
+        super().__init__()
+
+        # Get the game instance (for collision use)
+        self.game = game
+
+        # Load in the sprites images
+        self.loadImages()
+
+        # Defines the type of upsgrade
+        self.type = upgrade_Type
+
+        # Define the image size, color, etc
+        self.image = self.boost_frames[0]
+ 
+        # Fetch the rectangle object that has the dimensions of the image.
+        self.rect = self.image.get_rect()
+        self.rect.left = upgrade_X - 2
+        self.rect.bottom = upgrade_Y
+
+        # Define the enemy mask
+        self.mask = pygame.mask.from_surface(self.image)
+
+        # Define captured variable
+        self.used = False
+
+    def landed_On(self):
+        self.used = True
+        self.image = self.boost_frames[1]
+        currentX, currentY = self.rect.midbottom
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (currentX, currentY)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def loadImages(self):
+        self.boost_frames = []
+
+        scaleWidth = WIDTH // 12
+        scaleHeight = HEIGHT // 12
+
+        self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(128, 1792, 128, 128), (scaleWidth, scaleHeight)))
+        self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(128, 1664, 128, 128), (scaleWidth, scaleHeight)))

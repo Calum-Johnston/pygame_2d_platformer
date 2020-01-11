@@ -45,6 +45,7 @@ class Game:
         self.enemy_spritesheet = SpriteSheet(ENEMY_SPRITESHEET)
         self.platform_spritesheet = SpriteSheet(PLATFORM_SPRITESHEET)
         self.items_spritesheet = SpriteSheet(ITEM_SPRITESHEET)
+        self.tiles_spritesheet = SpriteSheet(TILES_SPRITESHEET)
 
         # Read in pre-built platform sections
         easy = []; medium = []; hard = []
@@ -66,7 +67,6 @@ class Game:
         # Flag related variables
         self.flags_captured = 0
         self.place_flag = False
-
 
         # Define DIFFICULTY SETTINGS
         self.difficulty = 0
@@ -93,7 +93,8 @@ class Game:
         self.distanceToNextBuild = HEIGHT
 
         # Create the camera
-        self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites, self.projectile_sprites, self.item_sprites)
+        self.camera = Camera(self, self.player, self.platform_sprites, self.enemy_sprites,
+         self.projectile_sprites, self.item_sprites)
 
 
     """ Runs the game. Defines the main game loop. """ 

@@ -3,7 +3,6 @@ TITLE = "University Project"
 WIDTH = 280
 HEIGHT = 500
 FPS = 60
-MAX_DISTANCE_UP = 130
 
 # Player settings
 PLAYER_ACCELERATION = 0.5
@@ -28,6 +27,7 @@ PLAYER_SPRITESHEET = "spritesheet_players.png"
 ENEMY_SPRITESHEET = "spritesheet_enemies.png"
 PLATFORM_SPRITESHEET = "spritesheet_ground.png"
 ITEM_SPRITESHEET = "spritesheet_items.png"
+TILES_SPRITESHEET = "spritesheet_tiles.png"
 
 
 # Colours

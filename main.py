@@ -165,7 +165,12 @@ class Game:
 
     """ Display everything to the screen for the game. """
     def draw(self):
-        screen.fill(CYAN)
+        # If player is invincible!
+        if(self.player.invincibleTime > 0):
+            screen.fill(RED)
+        else:
+            screen.fill(CYAN)
+            
         self.platform_sprites.draw(screen)
         self.item_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
@@ -266,6 +271,8 @@ class Game:
     def getScore(self):
         return self.score
 
+    def getScreen(self):
+        return screen
 
 class startScreen():
     def __init__(self, highscore):

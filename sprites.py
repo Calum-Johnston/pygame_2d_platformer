@@ -2,6 +2,8 @@ import pygame
 from settings import *
 import random as rd
 from math import hypot
+from PIL import Image # (pip install Pillow)
+import PIL.ImageOps   
 vec = pygame.math.Vector2
 
 ''' PLAYER SPRITE '''
@@ -26,7 +28,8 @@ class Player(pygame.sprite.Sprite):
         self.tickCount = 0
 
         # Define power up variables (used for powerups)
-        self.boostPowerUp = False      
+        self.boostPowerUp = False  
+        self.invincibleTime = 0   
 
         # Define the image size, color, etc
         self.image = self.idle_frames[0]
@@ -42,6 +45,9 @@ class Player(pygame.sprite.Sprite):
         self.position = vec(self.rect.midbottom)
         self.velocity = vec(0, 0)
         self.acceleration = vec(0, 0)
+
+        # Define a default direction
+        self.direction = "R"
 
     def update(self):
 
@@ -89,6 +95,10 @@ class Player(pygame.sprite.Sprite):
         # Update the tick count 
         self.tickCount += 1
 
+        if(self.invincibleTime > 0):
+            self.invincibleTime -= 1
+
+
     def checkCollisions(self):
         #Check for PLATFORM collision
         if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
@@ -105,13 +115,13 @@ class Player(pygame.sprite.Sprite):
                     self.boostPowerUp = False
     
         # Check for ENEMY Collision
-        if(not self.boostPowerUp):
+        if(not self.boostPowerUp and self.invincibleTime == 0):
             collision = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
             if(collision):
                 self.game.gameinstance = False
 
         # Check for PROJECTILE Collision
-        if(not self.boostPowerUp):
+        if(not self.boostPowerUp and self.invincibleTime == 0):
             collision = pygame.sprite.spritecollide(self, self.game.projectile_sprites, False, pygame.sprite.collide_mask)
             if(collision):
                 self.game.gameinstance = False
@@ -125,8 +135,14 @@ class Player(pygame.sprite.Sprite):
                         item.update_Captured()
                         self.game.flags_captured += 1
                 elif(item.type == "boost"):
-                    self.velocity.y = BOOST_POWER
-                    self.boostPowerUp = True
+                    if(item.used == False):
+                        self.velocity.y = BOOST_POWER
+                        self.boostPowerUp = True
+                        item.isUsed()
+                elif(item.type == "invincible"):
+                    if(item.used == False):
+                        self.invincibleTime = FPS * 5
+                        item.isUsed()
 
     def jump(self):
         # Checks whether a player is standing on an object
@@ -141,39 +157,37 @@ class Player(pygame.sprite.Sprite):
 
     def animate(self):
         self.updateStates()
+
+        # Updates image (in order of priority)
         if(self.crouching):
-            if(self.tickCount > 15):
-                self.tickCount = 0
-                self.currentImage = (self.currentImage + 1) % len(self.crouching_frames)
-                self.image = self.crouching_frames[self.currentImage]
-                currentX, currentY = self.rect.midbottom
-                self.rect = self.image.get_rect()
-                self.rect.midbottom = (currentX, currentY)
-        if(self.idle):
-            if(self.tickCount > 30):
+            self.tickCount = 0
+            self.currentImage = (self.currentImage + 1) % len(self.crouching_frames)
+            self.image = self.crouching_frames[self.currentImage]
+        elif(self.idle):
+            if(self.tickCount > FPS / 2):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.idle_frames)
                 self.image = self.idle_frames[self.currentImage]
-                currentX, currentY = self.rect.midbottom
-                self.rect = self.image.get_rect()
-                self.rect.midbottom = (currentX, currentY)
         elif(self.jumping):
-            if(self.tickCount > 15):
-                self.tickCount = 0
-                self.currentImage = (self.currentImage + 1) % len(self.jumping_frames)
-                self.image = self.jumping_frames[self.currentImage]
-                currentX, currentY = self.rect.midbottom
-                self.rect = self.image.get_rect()
-                self.rect.midbottom = (currentX, currentY)
+            self.tickCount = 0
+            self.currentImage = (self.currentImage + 1) % len(self.jumping_frames_r)
+            if(self.direction == "R"):
+                self.image = self.jumping_frames_r[self.currentImage]
+            else:
+                self.image = self.jumping_frames_l[self.currentImage]
         elif(self.walking):
-            if(self.tickCount > 15):
+            if(self.tickCount > FPS / 4):
                 self.tickCount = 0
                 self.currentImage = (self.currentImage + 1) % len(self.walking_frames_r)
-                if(self.velocity.x > 0): self.image = self.walking_frames_r[self.currentImage]
-                else: self.image = self.walking_frames_l[self.currentImage]
-                currentX, currentY = self.rect.midbottom
-                self.rect = self.image.get_rect()
-                self.rect.midbottom = (currentX, currentY)
+                if(self.velocity.x > 0): 
+                    self.image = self.walking_frames_r[self.currentImage]
+                else: 
+                    self.image = self.walking_frames_l[self.currentImage]
+
+        # Update image rect and mask
+        currentX, currentY = self.rect.midbottom
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (currentX, currentY)
         self.mask = pygame.mask.from_surface(self.image)
 
     def updateStates(self):
@@ -190,17 +204,21 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.walking = False
 
-        print("Idle: " , self.idle)
-        print("Walking: " , self.walking)
-        print("Jumping: " , self.jumping)
-        print()
+        # Update direction state (doesn't update at 0)
+        # (so hence acts as last direction moved as well)
+        if(self.velocity.x > 0):
+            self.direction = "R"
+        elif(self.velocity.x < 0):
+            self.direction = "L"
 
+        # Jumping state updated elsewhere
         
     def loadImages(self):
         self.idle_frames = []
         self.walking_frames_r = []
         self.walking_frames_l = []
-        self.jumping_frames = []
+        self.jumping_frames_r = []
+        self.jumping_frames_l = []
         self.crouching_frames = []
 
         scaleWidth = WIDTH // 6
@@ -208,6 +226,8 @@ class Player(pygame.sprite.Sprite):
         
         # Update idle frame
         self.idle_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 0, 128, 256), (scaleWidth, scaleHeight)))
+        self.idle_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 768, 128, 256), (scaleWidth, scaleHeight)))
+        self.idle_frames.append(pygame.transform.scale(pygame.transform.flip(self.game.player_spritesheet.getImageAt(768, 0, 128, 256), True, False), (scaleWidth, scaleHeight)))
         self.idle_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 768, 128, 256), (scaleWidth, scaleHeight)))
 
         # Update walking frames
@@ -217,11 +237,12 @@ class Player(pygame.sprite.Sprite):
         self.walking_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.player_spritesheet.getImageAt(640, 1024, 128, 256), True, False), (scaleWidth, scaleHeight)))
 
         # Update jumping frames
-        self.jumping_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 256, 128, 256), (scaleWidth, scaleHeight)))
+        self.jumping_frames_r.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 256, 128, 256), (scaleWidth, scaleHeight)))
+        self.jumping_frames_l.append(pygame.transform.scale(pygame.transform.flip(self.game.player_spritesheet.getImageAt(768, 256, 128, 256), True, False), (scaleWidth, scaleHeight)))
 
         # Update crouching frames
         self.crouching_frames.append(pygame.transform.scale(self.game.player_spritesheet.getImageAt(768, 1024, 128, 256), (scaleWidth, scaleHeight)))
-    
+
 
 
 
@@ -259,16 +280,26 @@ class Platform(pygame.sprite.Sprite):
             flag = Flag(rd.randrange(self.rect.left, self.rect.right), self.rect.top, self.game)
             self.game.item_sprites.add(flag)
 
-        # Is the platform going to be moving (only if it has no flag?
         self.movingX = False
+        self.movingX_Speed = 0
+
+        # If no flag
         if(not self.place_flag):
-            self.movingX_Speed = rd.choice(self.game.platform_movement_speed)
+
+            # Is the platform going to be moving (only if it has no flag?
             if(rd.randrange(0, self.game.platform_movement_chance) == 0):
+                self.movingX_Speed = rd.choice(self.game.platform_movement_speed)
                 self.movingX = True
 
-        if(not self.place_flag):
+            # Is the platform going to have a boost upgrade
             if(rd.randrange(0, BOOST_SPAWN_CHANCE) == 0):
                 upgrade = Upgrade(rd.randrange(self.rect.left, self.rect.right), self.rect.top, "boost",
+                    self, self.game)
+                self.game.item_sprites.add(upgrade)
+
+            # Is the platform going to have an invincibility upgrade
+            elif(rd.randrange(0, INVINCIBLE_SPAWN_CHANCE) == 0):
+                upgrade = Upgrade(rd.randrange(self.rect.left, self.rect.right), self.rect.top, "invincible",
                     self, self.game)
                 self.game.item_sprites.add(upgrade)
 
@@ -278,8 +309,6 @@ class Platform(pygame.sprite.Sprite):
             if(self.rect.right > WIDTH or self.rect.left < 0):
                 self.movingX_Speed= -self.movingX_Speed
             self.rect.x += self.movingX_Speed
-
-
 
     def loadImages(self):
         self.platform_frames = []
@@ -516,14 +545,17 @@ class Upgrade(pygame.sprite.Sprite):
         # Get the game instance (for collision use)
         self.game = game
 
-        # Load in the sprites images
-        self.loadImages()
-
         # Defines the type of upsgrade
         self.type = upgrade_Type
 
+        # Load in the sprites images
+        self.loadImages()
+
         # Define platform that connects it
         self.plat = plat
+
+        # Define whether it has been used or not
+        self.used = False
 
         # Define moving variables
         self.movingX = self.plat.movingX
@@ -547,10 +579,23 @@ class Upgrade(pygame.sprite.Sprite):
                 self.movingX_Speed= -self.movingX_Speed
             self.rect.x += self.movingX_Speed
 
+    def isUsed(self):
+        self.used = True
+        self.image = self.boost_frames[1]
+        currentX, currentY = self.rect.midbottom
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = (currentX, currentY)
+        self.mask = pygame.mask.from_surface(self.image)
+
     def loadImages(self):
         self.boost_frames = []
 
         scaleWidth = WIDTH // 12
         scaleHeight = HEIGHT // 12
 
-        self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(128, 1792, 128, 128), (scaleWidth, scaleHeight)))
+        if(self.type == "boost"):
+            self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(128, 1792, 128, 128), (scaleWidth, scaleHeight)))
+            self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(128, 1664, 128, 128), (scaleWidth, scaleHeight)))
+        elif(self.type == "invincible"):
+            self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(256, 1024, 128, 128), (scaleWidth, scaleHeight)))
+            self.boost_frames.append(pygame.transform.scale(self.game.tiles_spritesheet.getImageAt(512, 1024, 128, 128), (scaleWidth, scaleHeight)))

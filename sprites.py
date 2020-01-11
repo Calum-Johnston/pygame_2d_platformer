@@ -125,13 +125,15 @@ class Player(pygame.sprite.Sprite):
                         item.update_Captured()
                         self.game.flags_captured += 1
                 elif(item.type == "boost"):
-                    self.velocity.y = -50
+                    self.velocity.y = BOOST_POWER
                     self.boostPowerUp = True
 
     def jump(self):
+        # Checks whether a player is standing on an object
         self.rect.y += 1
         collision = pygame.sprite.spritecollide(self, self.game.platform_sprites, False)
         self.rect.y -= 1
+
         # If the player is on an object and not already in motion
         if(collision and not self.jumping):
             self.jumping = True
@@ -265,8 +267,9 @@ class Platform(pygame.sprite.Sprite):
                 self.movingX = True
 
         if(not self.place_flag):
-            if(rd.randrange(0, 10) == 0):
-                upgrade = Upgrade(rd.randrange(self.rect.left, self.rect.right), self.rect.top, "boost", self.game)
+            if(rd.randrange(0, BOOST_SPAWN_CHANCE) == 0):
+                upgrade = Upgrade(rd.randrange(self.rect.left, self.rect.right), self.rect.top, "boost",
+                    self, self.game)
                 self.game.item_sprites.add(upgrade)
 
     def update(self):
@@ -275,6 +278,8 @@ class Platform(pygame.sprite.Sprite):
             if(self.rect.right > WIDTH or self.rect.left < 0):
                 self.movingX_Speed= -self.movingX_Speed
             self.rect.x += self.movingX_Speed
+
+
 
     def loadImages(self):
         self.platform_frames = []
@@ -505,7 +510,7 @@ class Flag(pygame.sprite.Sprite):
 ''' UPGRADE CLASS '''
 class Upgrade(pygame.sprite.Sprite):
 
-    def __init__(self, upgrade_X, upgrade_Y, upgrade_Type, game):
+    def __init__(self, upgrade_X, upgrade_Y, upgrade_Type, plat, game):
         super().__init__()
 
         # Get the game instance (for collision use)
@@ -517,9 +522,16 @@ class Upgrade(pygame.sprite.Sprite):
         # Defines the type of upsgrade
         self.type = upgrade_Type
 
+        # Define platform that connects it
+        self.plat = plat
+
+        # Define moving variables
+        self.movingX = self.plat.movingX
+        self.movingX_Speed = self.plat.movingX_Speed
+
         # Define the image size, color, etc
         self.image = self.boost_frames[0]
- 
+  
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
         self.rect.left = upgrade_X - 2
@@ -527,6 +539,13 @@ class Upgrade(pygame.sprite.Sprite):
 
         # Define the enemy mask
         self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self):
+        # If item  moves horizontally, move it
+        if(self.movingX):
+            if(self.plat.rect.right > WIDTH or self.plat.rect.left < 0):
+                self.movingX_Speed= -self.movingX_Speed
+            self.rect.x += self.movingX_Speed
 
     def loadImages(self):
         self.boost_frames = []

@@ -82,6 +82,7 @@ class Game:
         self.enemy_sprites = pygame.sprite.Group()
         self.projectile_sprites = pygame.sprite.Group()
         self.item_sprites = pygame.sprite.Group()
+        self.upgrade_sprites = pygame.sprite.Group()
 
         # Define player sprite
         self.player = Player(WIDTH / 2, HEIGHT - 50, 40, 50, self)

@@ -22,6 +22,10 @@ ENEMY_SHOOT_CHANCE = 100
 RANDOM_WIDTH_MIN = 40
 RANDOM_WIDTH_MAX = 100
 
+# Upgrade Settings
+BOOST_SPAWN_CHANCE = 5
+BOOST_POWER = -50
+
 # SpriteSheet settings
 PLAYER_SPRITESHEET = "spritesheet_players.png"
 ENEMY_SPRITESHEET = "spritesheet_enemies.png"

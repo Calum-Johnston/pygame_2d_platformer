@@ -332,6 +332,9 @@ class Enemy(pygame.sprite.Sprite):
         self.currentImage = 0
         self.tickCount = 0
 
+        # Define number of projectiles
+        self.projectile_number = 0
+
         # Define the image size, color, etc
         self.image = self.walking_frames_r[0]
  
@@ -360,9 +363,10 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.x += self.velocity.x
 
             # Produce projectile
-            if(rd.randrange(0, ENEMY_SHOOT_CHANCE) < 1):
-                proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self.game)
+            if(rd.randrange(0, ENEMY_SHOOT_CHANCE) < 1 and self.projectile_number < MAX_PROJECTILES_PER_ENEMY):
+                proj = Projectile(self.rect.centerx, self.rect.centery, self.game.player.rect.centerx, self.game.player.rect.centery, self, self.game)
                 self.game.projectile_sprites.add(proj)
+                self.projectile_number += 1
 
             # Update tickcount and speedtick
             self.tickCount += 1
@@ -398,28 +402,39 @@ class Enemy(pygame.sprite.Sprite):
 class Projectile(pygame.sprite.Sprite):
 
     #https://stackoverflow.com/questions/31148730/making-a-bullet-move-to-your-cursor-using-pygame
-    def __init__(self, projectile_X, projectile_Y, playerX, playerY, game):
+    def __init__(self, projectile_X, projectile_Y, playerX, playerY, enemy, game):
         super().__init__()   
 
+        # Define the game instance
         self.game = game
 
+        # Define the enemy that spawned the projectile
+        self.enemy = enemy
+
+        # Load in the sprites images
         self.loadImages()
 
+        # Define current and destination coordinates
         self.currentX = projectile_X
         self.destX = playerX 
         self.currentY = projectile_Y
         self.destY = playerY 
 
+        # Define the projectile speed
         self.speed = 1
  
+        # Define change in coordinate values (differentials)
         self.dx = self.destX - self.currentX
         self.dy = self.destY - self.currentY
 
+        # Define the image size, color, etc
         self.image = self.projectileImage
 
+        # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
         self.rect.center = (self.currentX, self.currentY)
 
+        # Define the enemy mask
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):

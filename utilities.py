@@ -15,7 +15,6 @@ class Camera():
         self.projectiles = projectiles
         self.items = items
 
-
     def update(self):
         # Move camera upward if player is moving upward above a certain point
         if (self.player.rect.top <= HEIGHT * 0.3 and abs(self.player.velocity.y) > 0):
@@ -43,6 +42,7 @@ class Camera():
             for proj in self.projectiles:
                 proj.currentY += abs(self.player.velocity.y)
                 if(proj.rect.top >= HEIGHT):
+                    proj.enemy.projectile_number -= 1
                     proj.kill()
 
             # Update items
@@ -55,7 +55,8 @@ class Camera():
                     item.kill()
 
             # Spawn new enemies (only when screen is generated)   
-            if(rd.randrange(0, self.game.enemy_spawn_chance) < 1 and len(self.game.enemy_sprites) < 3):
+            # Function should really happen inside a different class (since this is for the camera)
+            if(rd.randrange(0, self.game.enemy_spawn_chance) < 1 and len(self.game.enemy_sprites) < MAX_ENEMIES):
                 self.enemy = Enemy(rd.randrange((WIDTH // 2) - (WIDTH // 4), (WIDTH // 2) + (WIDTH // 4)), 0 - (HEIGHT / 2), 40, 50, self.game)
                 self.game.enemy_sprites.add(self.enemy)
 

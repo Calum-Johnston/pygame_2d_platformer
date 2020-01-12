@@ -1,5 +1,5 @@
 # Game settings
-TITLE = "University Project"
+TITLE = "Sky Hop!"
 WIDTH = 280
 HEIGHT = 500
 FPS = 60
@@ -25,7 +25,9 @@ RANDOM_WIDTH_MAX = 100
 # Upgrade Settings
 BOOST_SPAWN_CHANCE = 100
 BOOST_POWER = -50
-INVINCIBLE_SPAWN_CHANCE = 4
+INVINCIBLE_SPAWN_CHANCE = 200
+INVINCIBLE_MINIMUM_DURATION = FPS * 2
+INVINCIBLE_MAXIMUM_DURATION = FPS * 10
 
 # SpriteSheet settings
 PLAYER_SPRITESHEET = "spritesheet_players.png"
@@ -35,12 +37,16 @@ ITEM_SPRITESHEET = "spritesheet_items.png"
 TILES_SPRITESHEET = "spritesheet_tiles.png"
 
 
-# Colours
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+# Mai Game Colours
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-CYAN = (0, 255, 255)
-MAGNETA = (255, 0, 255)
-YELLOW = (255, 255, 0)
+SKY_BLUE = (0, 255, 255)
+DARK_SKATE_BLUE = (72, 61, 129)
+SALMON = (250, 128, 114)
+
+# Game Over Screen Colour Scheme
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREY = (78, 78, 80)
+MAROON = (149, 7, 64)

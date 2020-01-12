@@ -2,8 +2,6 @@ import pygame
 from settings import *
 import random as rd
 from math import hypot
-from PIL import Image # (pip install Pillow)
-import PIL.ImageOps   
 vec = pygame.math.Vector2
 
 ''' PLAYER SPRITE '''
@@ -63,9 +61,9 @@ class Player(pygame.sprite.Sprite):
             self.acceleration.x = PLAYER_ACCELERATION
         if(keysPressed[pygame.K_LEFT] or keysPressed[pygame.K_a]): 
             self.acceleration.x = -PLAYER_ACCELERATION
-        if(keysPressed[pygame.K_SPACE]):
+        if(keysPressed[pygame.K_SPACE] or keysPressed[pygame.K_w] or keysPressed[pygame.K_UP]):
             self.jump()
-        if(keysPressed[pygame.K_DOWN] and self.jumping == False):
+        if((keysPressed[pygame.K_DOWN] or keysPressed[pygame.K_LCTRL] or keysPressed[pygame.K_s]) and self.jumping == False):
             self.crouching = True
 
         # Decrease acceleration according friction, update velocity according to acceleration
@@ -98,7 +96,6 @@ class Player(pygame.sprite.Sprite):
         if(self.invincibleTime > 0):
             self.invincibleTime -= 1
 
-
     def checkCollisions(self):
         #Check for PLATFORM collision
         if(self.velocity.y > 0):  # y's default velocity will be 0.5 after applying gravity
@@ -111,6 +108,8 @@ class Player(pygame.sprite.Sprite):
                 if(self.platform.rect.bottom > self.rect.bottom): 
                     self.position.y = self.platform.rect.top + 1
                     self.velocity.y = 0
+                    if(self.jumping):
+                        self.tickCount = FPS
                     self.jumping = False
                     self.boostPowerUp = False
     
@@ -141,7 +140,7 @@ class Player(pygame.sprite.Sprite):
                         item.isUsed()
                 elif(item.type == "invincible"):
                     if(item.used == False):
-                        self.invincibleTime = FPS * 5
+                        self.invincibleTime = rd.randrange(INVINCIBLE_MINIMUM_DURATION, INVINCIBLE_MAXIMUM_DURATION) 
                         item.isUsed()
 
     def jump(self):

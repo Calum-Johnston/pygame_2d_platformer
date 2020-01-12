@@ -116,6 +116,9 @@ class Game:
             if event.type == pygame.QUIT:
                 running = False
                 self.gameinstance = False
+            if event.type == pygame.KEYUP:
+                self.player.tickCount = FPS
+            
 
 
     """ Updates game objects (animations, position, etc) """
@@ -169,26 +172,26 @@ class Game:
         if(self.player.invincibleTime > 0):
             screen.fill(RED)
         else:
-            screen.fill(CYAN)
-            
+            screen.fill(SKY_BLUE)
         self.platform_sprites.draw(screen)
         self.item_sprites.draw(screen)
         self.enemy_sprites.draw(screen)
         self.projectile_sprites.draw(screen)
         self.player_sprites.draw(screen)
         if(not self.gameinstance):
+            self.fade()
             self.gameOver()
         self.drawText("Score: " + str(self.score), 60, HEIGHT - 20, 36, BLACK)
-        self.drawText("Treasures: " + str(self.flags_captured), WIDTH - 80,  HEIGHT - 20, 36, BLACK)
+        self.drawText("Flags: " + str(self.flags_captured), WIDTH - 60,  HEIGHT - 20, 36, BLACK)
         pygame.display.flip()
 
 
     """ Produces the game over screen """
     def gameOver(self):
-        self.drawText("GAME OVER", WIDTH // 2, HEIGHT // 16 * 1, 46, BLACK)
-        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT // 16 * 2, 32, MAGNETA)
-        self.drawText("Flags captured: " + str(self.flags_captured), WIDTH // 2, HEIGHT // 16 * 3, 32, MAGNETA)
-        self.drawText("Press ESC to return!", WIDTH / 2, HEIGHT - 40, 30, YELLOW)
+        self.drawText("GAME OVER", WIDTH // 2, HEIGHT // 16 * 7, 46, WHITE)
+        self.drawText("Score:" + str(self.score), WIDTH // 2, HEIGHT // 16 * 8, 32, GREY)
+        self.drawText("Flags captured: " + str(self.flags_captured), WIDTH // 2, HEIGHT // 16 * 9, 32, GREY)
+        self.drawText("Press ESC to return!", WIDTH / 2, HEIGHT - 40, 30, MAROON)
         pygame.display.flip()
         keyPressed = False
         while(not keyPressed):
@@ -199,10 +202,9 @@ class Game:
                     if(event.key == pygame.K_ESCAPE):
                         keyPressed = True
 
-
     """ Loads pre-built platforms into the game (just out of view)
         based on textfiles read in previously. 
-        CURRENTLY NOT IN USE"""  
+        CURRENTLY ONLY IN USE FOR INITIALISATION"""  
     def loadNewPlatforms(self, newGame):
         if(newGame): 
             new_Section = easy[0]
@@ -266,13 +268,21 @@ class Game:
         text_rect.center = (text_X, text_Y)
         screen.blit(text, text_rect)
 
-
     """ Returns the score """
     def getScore(self):
         return self.score
 
-    def getScreen(self):
-        return screen
+    """ Fades the screen tp black """
+    def fade(self):
+        fade = pygame.Surface((WIDTH, HEIGHT))
+        fade.fill((0, 0, 0))
+        for alpha in range(0, 300):
+            fade.set_alpha(alpha)
+            screen.fill((255, 255, 255))
+            screen.blit(fade, (0, 0))
+            pygame.display.update()
+            pygame.time.delay(5)
+
 
 class startScreen():
     def __init__(self, highscore):
@@ -292,13 +302,20 @@ class startScreen():
             clock.tick(FPS)
 
     def drawSplashScreen(self):
-        screen.fill(CYAN)
-        self.drawText(TITLE, WIDTH / 2, HEIGHT / 4, 40, RED)
-        self.drawText("LEFT/RIGHT = Arrow keys!", WIDTH / 2, HEIGHT / 8 * 3.5, 24, RED)
-        self.drawText("JUMP = Space bar!", WIDTH / 2, HEIGHT / 2, 24, RED)
-        self.drawText("Press any key to start!", WIDTH / 2, HEIGHT * 5 / 8, 30, RED)
-        self.drawText("CURRENT HIGHSCORE = " + str(self.highscore), WIDTH / 2, HEIGHT * 7 / 8, 26, BLACK)
-        pygame.draw.rect(screen, RED, (30, 180, 220, 100), 1)
+        screen.fill(SKY_BLUE)
+        self.drawText(TITLE, WIDTH / 2, 40, 40, SALMON)
+        self.drawText("RULES!", WIDTH / 2, 100, 24, DARK_SKATE_BLUE)
+        self.drawText("Collect the treasures (10 to find!)", WIDTH / 2, 120, 24, GREY)
+        self.drawText("Watch out for monsters", WIDTH / 2, 140, 24, GREY)
+        self.drawText("CONTROLS!", WIDTH / 2, 180, 24, DARK_SKATE_BLUE)
+        self.drawText("LEFT/RIGHT = Left/Right Key or W/D!", WIDTH / 2, 200, 24, GREY)
+        self.drawText("JUMP = Space bar!", WIDTH / 2, 220, 24, GREY)
+        self.drawText("CROUCH = Ctrl / Down Key!", WIDTH / 2, 240, 24, GREY)
+        self.drawText("POWERUPS!", WIDTH / 2, 280, 24, DARK_SKATE_BLUE)
+        self.drawText("Spring = Super high jump!", WIDTH / 2, 300, 24, GREY)
+        self.drawText("Mushroom = Invincibility!", WIDTH / 2, 320, 24, GREY)
+        self.drawText("CURRENT HIGHSCORE = " + str(self.highscore), WIDTH / 2, 400, 26, BLACK)
+        self.drawText("Press any key to start!", WIDTH / 2, 460, 30, MAROON)
         pygame.display.flip()
 
     def drawText(self, text, text_X, text_Y, text_Size, text_Colour):
@@ -307,7 +324,6 @@ class startScreen():
         text_rect = text.get_rect()
         text_rect.center = (text_X, text_Y)
         screen.blit(text, text_rect)
-
     
 
 

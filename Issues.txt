@@ -3,13 +3,8 @@ Still to do:
 - General improvements to code, design, layout!!!
 
 
-
-MAKE TICK COUNT A THING IN PLAYER
-
 Could do, but don't have to:
-- Add special abilities
 - Improve moving off the screen
-- Implement equation to calculate max jump height (for platform gen.) (Issue here - To do with checking for collision and resetting y value)
 - Make scaling automatic (for loading in images)
 - Make it so it works for any size screen
 - Build some pre-built challenge parts (more mobs, hard jumps, etc)

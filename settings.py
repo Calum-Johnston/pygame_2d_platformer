@@ -36,16 +36,11 @@ PLATFORM_SPRITESHEET = "spritesheet_ground.png"
 ITEM_SPRITESHEET = "spritesheet_items.png"
 TILES_SPRITESHEET = "spritesheet_tiles.png"
 
-
-# Mai Game Colours
+# Colours
 RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
 SKY_BLUE = (0, 255, 255)
 DARK_SKATE_BLUE = (72, 61, 129)
 SALMON = (250, 128, 114)
-
-# Game Over Screen Colour Scheme
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (78, 78, 80)

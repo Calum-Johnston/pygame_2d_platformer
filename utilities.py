@@ -49,6 +49,9 @@ class Camera():
             for item in self.items:
                 item.rect.y += abs(self.player.velocity.y)
                 if(item.rect.top >= HEIGHT):
+                    # If user passes a flag and are in boost mode automatically collect it
+                    if(item.type == "flag" and self.game.player.boostPowerUp):
+                        self.game.flags_captured += 1
                     item.kill()
 
             # Spawn new enemies (only when screen is generated)   

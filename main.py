@@ -241,7 +241,7 @@ class Game:
                 closestPlatform_Distance = pt.rect.top
         
         firstPositionY = 0
-        for x in range(0, 6):
+        for i in range(0, 6):
             width = rd.randrange(RANDOM_WIDTH_MIN, RANDOM_WIDTH_MAX)
             x = rd.randrange(0, WIDTH - width)
             y = rd.randrange(min(closestPlatform_Distance - 130, -1), min(closestPlatform_Distance - self.difficulty_platform_dist, 1)) 
@@ -253,12 +253,9 @@ class Game:
                 pt = Platform(x, y, width, 20, self.place_flag, self)
             self.platform_sprites.add(pt)
 
-            if(x == 0):
-                firstPositionY = y
             closestPlatform_Distance = y
         
         self.distanceToNextBuild = abs(firstPositionY - closestPlatform_Distance)
-
 
     """ Draws text onto the screen """
     def drawText(self, text, text_X, text_Y, text_Size, text_Colour):
